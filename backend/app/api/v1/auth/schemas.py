@@ -23,10 +23,15 @@ class TokenResponse(BaseModel):
 class MeResponse(BaseModel):
     id: UUID
     email: EmailStr
-    full_name: Optional[str]
+    full_name: Optional[str] = None
+    title: Optional[str] = None
+    profile_photo_url: Optional[str] = None
     role: RoleEnum
     discipline: Optional[DisciplineEnum] = None
 
+class ProfileUpdate(BaseModel):
+    full_name: Optional[str] = Field(None, max_length=255)
+    title: Optional[str] = Field(None, max_length=100)
 
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr

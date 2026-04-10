@@ -10,7 +10,7 @@ celery_app = Celery(
     "clinedops",
     broker=settings.celery_broker_url,
     backend=settings.celery_result_backend,
-    include=["app.tasks.surveys", "app.tasks.reports"]
+    include=["app.tasks.surveys", "app.tasks.reports", "app.tasks.notifications"]
 )
 
 # Celery CLI expects a module-level variable named `celery` by default.

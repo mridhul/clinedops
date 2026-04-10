@@ -36,6 +36,14 @@ export function useTutorFeedback(accessToken: string | null, tutorId: string | u
   })
 }
 
+export function useMyTutorFeedback(accessToken: string | null) {
+  return useQuery({
+    queryKey: ['surveys', 'feedback', 'me', accessToken],
+    queryFn: () => apiFetch<TutorFeedbackSummary>('/my/feedback', { accessToken }),
+    enabled: Boolean(accessToken),
+  })
+}
+
 export function useSubmitSurvey(accessToken: string | null) {
   const qc = useQueryClient()
   return useMutation({

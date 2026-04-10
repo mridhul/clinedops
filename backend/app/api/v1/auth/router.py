@@ -2,13 +2,23 @@ from __future__ import annotations
 
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+import shutil
+import uuid
+import os
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, File, UploadFile
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.deps import get_current_user
-from app.api.v1.auth.schemas import ForgotPasswordRequest, LoginRequest, MeResponse, ResetPasswordRequest, TokenResponse
+from app.api.v1.auth.schemas import (
+    ForgotPasswordRequest, 
+    LoginRequest, 
+    MeResponse, 
+    ResetPasswordRequest, 
+    TokenResponse,
+    ProfileUpdate
+)
 from app.core.config import get_settings
 from app.core.security import decode_jwt
 from app.db.models import User
@@ -125,11 +135,85 @@ async def me(
             id=user.id,
             email=user.email,
             full_name=user.full_name,
+            title=user.title,
+            profile_photo_url=user.profile_photo_url,
             role=RoleEnum(user.role),
             discipline=DisciplineEnum(user.discipline) if user.discipline else None,
         ),
         meta=None,
         errors=None,
+    )
+
+
+@router.patch("/me", response_model=Envelope[MeResponse])
+async def update_me(
+    payload: ProfileUpdate,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_session),
+) -> Envelope[MeResponse]:
+    if payload.full_name is not None:
+        user.full_name = payload.full_name
+    if payload.title is not None:
+        user.title = payload.title
+    
+    await session.flush()
+    await session.commit()
+    await session.refresh(user)
+
+    return Envelope(
+        data=MeResponse(
+            id=user.id,
+            email=user.email,
+            full_name=user.full_name,
+            title=user.title,
+            profile_photo_url=user.profile_photo_url,
+            role=RoleEnum(user.role),
+            discipline=DisciplineEnum(user.discipline) if user.discipline else None,
+        )
+    )
+
+
+@router.post("/me/profile-photo", response_model=Envelope[MeResponse])
+async def upload_profile_photo(
+    file: UploadFile = File(...),
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_session),
+) -> Envelope[MeResponse]:
+    # Check file type
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="File must be an image")
+
+    # Ensure upload directory exists
+    upload_dir = os.path.join("uploads", "profiles")
+    os.makedirs(upload_dir, exist_ok=True)
+
+    # Generate unique filename
+    ext = os.path.splitext(file.filename)[1]
+    filename = f"{uuid.uuid4()}{ext}"
+    file_path = os.path.join(upload_dir, filename)
+
+    # Save file
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    # Update user
+    # Store the URL path that the frontend will use
+    user.profile_photo_url = f"/uploads/profiles/{filename}"
+    
+    await session.flush()
+    await session.commit()
+    await session.refresh(user)
+
+    return Envelope(
+        data=MeResponse(
+            id=user.id,
+            email=user.email,
+            full_name=user.full_name,
+            title=user.title,
+            profile_photo_url=user.profile_photo_url,
+            role=RoleEnum(user.role),
+            discipline=DisciplineEnum(user.discipline) if user.discipline else None,
+        )
     )
 
 

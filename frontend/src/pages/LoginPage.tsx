@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Stethoscope, ArrowRight, Landmark } from 'lucide-react';
-import { useLogin } from '../api/auth';
+import { useLogin, fetchMe } from '../api/auth';
 import { useAuth } from '../auth/useAuth';
 import type { MeResponse } from '../types/auth';
 
@@ -28,13 +28,7 @@ const LoginPage: React.FC = () => {
       const res = await loginMutation.mutateAsync({ email, password });
       setAccessToken(res.access_token);
 
-      const profile: MeResponse = {
-        id: 'unknown',
-        email: email,
-        full_name: email.split('@')[0].split('.').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' '),
-        role: res.role,
-        discipline: res.discipline,
-      };
+      const profile = await fetchMe(res.access_token);
       setProfile(profile);
 
       navigate('/dashboard', { replace: true });

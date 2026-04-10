@@ -6,6 +6,8 @@ export type MeResponse = {
   id: string
   email: string
   full_name: string | null
+  title: string | null
+  profile_photo_url: string | null
   role: Role
   discipline: Discipline | null
 }

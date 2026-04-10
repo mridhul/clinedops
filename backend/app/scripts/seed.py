@@ -427,7 +427,7 @@ def seed_teaching_sessions(session, postings: list, tutors: list, students: list
         )
 
         result.append({"id": sid, "posting_id": posting["id"], "student_id": student_id,
-                        "discipline": disc, "approval_status": approval_status})
+                        "discipline": disc, "approval_status": approval_status, "tutor_id": tutor["id"]})
 
     session.commit()
     print(f"     Teaching sessions inserted: {len(result)}")
@@ -491,6 +491,23 @@ def seed_survey_submissions(session, templates: list, tech_sessions: list, stude
     for s in students:
         disc_students.setdefault(s["discipline"], []).append(s)
 
+    POSITIVE_COMMENTS = [
+        "Excellent bedside manner, very patient with questions.",
+        "The clinical demonstrations were very clear and helpful.",
+        "Great session on clinical reasoning. I learned a lot.",
+        "Very supportive and encouraging environment.",
+        "Strong focus on practical skills which was much appreciated.",
+        "Amazing tutor! Very knowledgeable and approachable.",
+        "The case discussions were insightful and relevant.",
+    ]
+    NEGATIVE_COMMENTS = [
+        "The session felt rushed and lacked depth.",
+        "Feedback was generic and not very helpful.",
+        "Instructions were bit unclear during the simulation.",
+        "Hard to follow at times, could be more organized.",
+        "Would appreciate more hands-on opportunities.",
+    ]
+
     count = 0
     for i in range(200):
         disc = DISCIPLINES[i % 4]
@@ -518,7 +535,7 @@ def seed_survey_submissions(session, templates: list, tech_sessions: list, stude
                 "id": assignment_id, "tmpl": tmpl["id"], "sid": student["id"],
                 "pid": session_obj["posting_id"],
                 "sids": json.dumps([str(session_obj["id"])]),
-                "tids": json.dumps([]),
+                "tids": json.dumps([str(session_obj["tutor_id"])]),
                 "status": assignment_status, "due": due_date,
                 "cb": admin_id, "now": utcnow(),
             },
@@ -535,9 +552,10 @@ def seed_survey_submissions(session, templates: list, tech_sessions: list, stude
                 "q1": {"score": scores[0]},
                 "q2": {"score": scores[1]},
                 "q3": {"score": scores[2]},
-                "q4": {"text": "Good learning experience overall." if not is_low_score else "Needs significant improvement."},
-                "q5": {"text": "More simulation opportunities would help." if not is_low_score else "Better feedback mechanism needed."},
+                "q4": {"text": random.choice(POSITIVE_COMMENTS) if not is_low_score else random.choice(NEGATIVE_COMMENTS)},
+                "q5": {"text": "Maybe more focus on the new protocol next time." if not is_low_score else "The environment was a bit distracting."},
                 "q6": {"selected": ["Clinical Skills", "Communication"]},
+                "comment": random.choice(POSITIVE_COMMENTS) if not is_low_score else random.choice(NEGATIVE_COMMENTS)
             }
 
             sub_id = uuid.uuid4()

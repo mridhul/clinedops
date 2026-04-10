@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, Tabs, Select, Button, Table, Tag, Space, Typography, message } from 'antd';
+import { Alert, Card, Tabs, Select, Button, Table, Tag, Space, Typography, message } from 'antd';
 import { DownloadOutlined, FilePdfOutlined, FileExcelOutlined, FileTextOutlined, PlusOutlined, HistoryOutlined } from '@ant-design/icons';
 import { useReportTemplates, useReportHistory, useCreateReportExecution } from '../../api/reports';
 import { useAuth } from '../../auth/useAuth';
@@ -10,12 +10,70 @@ const { Option } = Select;
 
 export default function ReportsPage() {
   const accessToken = useAuth((s) => s.accessToken);
-  const { data: templates, isLoading: loadingTemplates } = useReportTemplates(accessToken);
-  const { data: history, isLoading: loadingHistory } = useReportHistory(accessToken);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string | undefined
+  const {
+    data: templates,
+    isLoading: loadingTemplates,
+    isError: templatesIsError,
+    error: templatesError,
+  } = useReportTemplates(accessToken);
+  const {
+    data: history,
+    isLoading: loadingHistory,
+    isError: historyIsError,
+    error: historyError,
+  } = useReportHistory(accessToken);
   const createReport = useCreateReportExecution(accessToken);
 
   const [selectedTemplate, setSelectedTemplate] = useState<string | undefined>();
   const [selectedFormat, setSelectedFormat] = useState<string>('pdf');
+
+  const buildDownloadUrl = (fileUrl: string) => {
+    if (!fileUrl) return ''
+    if (/^https?:\/\//i.test(fileUrl)) return fileUrl
+
+    const base = (API_BASE_URL ?? '').replace(/\/$/, '')
+    const path = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`
+
+    // Back-compat: if base already ends with /api/v1 and path starts with /api/v1, avoid doubling.
+    const normalizedPath =
+      base.endsWith('/api/v1') && path.startsWith('/api/v1') ? path.replace(/^\/api\/v1/, '') : path
+
+    return `${base}${normalizedPath}`
+  }
+
+  const handleDownload = async (record: any) => {
+    if (!record?.file_url) return
+    if (!accessToken) {
+      message.error('You are not logged in')
+      return
+    }
+    try {
+      const downloadUrl = buildDownloadUrl(record.file_url)
+      const res = await fetch(downloadUrl, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${accessToken}` },
+        credentials: 'include',
+      })
+      if (!res.ok) {
+        throw new Error(`Download failed: ${res.status}`)
+      }
+      const blob = await res.blob()
+
+      const cd = res.headers.get('content-disposition') ?? ''
+      const match = cd.match(/filename=\"?([^\";]+)\"?/i)
+      const filename = match?.[1] ?? `report.${record.format ?? 'pdf'}`
+
+      const blobUrl = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = blobUrl
+      a.download = filename
+      a.click()
+      URL.revokeObjectURL(blobUrl)
+    } catch (e: any) {
+      message.error(e?.message ?? 'Download failed')
+    }
+  }
 
   const handleGenerate = async () => {
     if (!selectedTemplate) {
@@ -78,8 +136,7 @@ export default function ReportsPage() {
           type="link" 
           icon={<DownloadOutlined />} 
           disabled={record.status !== 'completed'}
-          href={record.file_url}
-          target="_blank"
+          onClick={() => handleDownload(record)}
         >
           Download
         </Button>
@@ -90,6 +147,25 @@ export default function ReportsPage() {
   return (
     <div>
       <Title level={2}>Reports & Analytics</Title>
+
+      {templatesIsError && (
+        <Alert
+          type="error"
+          showIcon
+          style={{ marginBottom: 16 }}
+          message="Failed to load report templates"
+          description={(templatesError as Error)?.message ?? 'Unable to load templates. Please check your permissions and try again.'}
+        />
+      )}
+      {historyIsError && (
+        <Alert
+          type="error"
+          showIcon
+          style={{ marginBottom: 16 }}
+          message="Failed to load report history"
+          description={(historyError as Error)?.message ?? 'Unable to load history. Please check your permissions and try again.'}
+        />
+      )}
       
       <Tabs defaultActiveKey="builder" items={[
         {
@@ -109,6 +185,8 @@ export default function ReportsPage() {
                     size="large"
                     onChange={setSelectedTemplate}
                     loading={loadingTemplates}
+                    disabled={templatesIsError}
+                    notFoundContent={loadingTemplates ? 'Loading...' : 'No templates found'}
                   >
                     {templates?.map(t => (
                       <Option key={t.id} value={t.id}>{t.name}</Option>
@@ -137,6 +215,7 @@ export default function ReportsPage() {
                     icon={<RocketOutlined />} 
                     block
                     loading={createReport.isPending}
+                    disabled={templatesIsError || loadingTemplates || !(templates?.length)}
                     onClick={handleGenerate}
                 >
                   Generate Report

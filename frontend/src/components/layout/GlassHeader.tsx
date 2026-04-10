@@ -145,22 +145,39 @@ const GlassHeader: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-3 pl-2 border-l border-border/50">
-          <div className="text-right hidden sm:block">
-            <p className="text-xs font-bold text-foreground">
-              {profile?.full_name || profile?.email || 'User'}
+          <div 
+            className="text-right hidden sm:block cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate('/dashboard/settings/profile')}
+          >
+            <p className="text-sm font-bold text-foreground leading-tight">
+              {profile?.full_name || 'User'}
             </p>
-            <p className="text-[10px] text-muted-foreground capitalize">
-              {profile?.role || 'Guest'}
+            <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+              {profile?.title || profile?.role?.replace('_', ' ') || 'Guest'}
             </p>
           </div>
           <Avatar 
-            className="h-8 w-8 border border-border/50 shadow-sm hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer"
-            onClick={handleSignOut}
-            title="Click to Sign Out"
+            className="h-10 w-10 border-2 border-background shadow-md hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer overflow-hidden bg-muted"
+            onClick={() => navigate('/dashboard/settings/profile')}
+            title="View Profile Settings"
           >
-            <AvatarImage src="" alt={profile?.full_name || 'User'} />
-            <AvatarFallback>{getInitials(profile?.full_name || null)}</AvatarFallback>
+            <AvatarImage 
+              src={profile?.profile_photo_url ? `http://localhost:8000${profile.profile_photo_url}` : undefined} 
+              alt={profile?.full_name || 'User'} 
+              className="object-cover"
+            />
+            <AvatarFallback className="bg-primary/10 text-primary font-bold">
+              {getInitials(profile?.full_name || null)}
+            </AvatarFallback>
           </Avatar>
+          
+          <div 
+            className="ml-1 p-1 hover:bg-accent rounded-md transition-colors cursor-pointer text-muted-foreground hover:text-destructive"
+            onClick={handleSignOut}
+            title="Sign Out"
+          >
+            <Settings size={16} className="rotate-90" />
+          </div>
         </div>
       </div>
     </nav>

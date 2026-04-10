@@ -88,14 +88,36 @@ export const useUpdateNotificationSettings = () => {
 
 export const useSendBroadcast = () => {
   return useMutation({
-    mutationFn: (params: { title: string; message: string; discipline?: string; role?: string }) => {
-      const query = new URLSearchParams();
-      query.append("title", params.title);
-      query.append("message", params.message);
-      if (params.discipline) query.append("discipline", params.discipline);
-      if (params.role) query.append("role", params.role);
-      
-      return apiFetch(`/notifications/broadcast?${query.toString()}`, { method: "POST" });
-    },
+    mutationFn: (body: {
+      title: string
+      message: string
+      target_role: 'student' | 'tutor'
+      discipline?: string
+      academic_cycle_id?: string
+      department_id?: string
+      posting_id?: string
+    }) =>
+      apiFetch<{ matched_count: number; sent_count: number }>('/notifications/broadcast', {
+        method: 'POST',
+        body,
+      }),
   });
 };
+
+export const usePreviewBroadcast = () => {
+  return useMutation({
+    mutationFn: (body: {
+      title: string
+      message: string
+      target_role: 'student' | 'tutor'
+      discipline?: string
+      academic_cycle_id?: string
+      department_id?: string
+      posting_id?: string
+    }) =>
+      apiFetch<{ matched_count: number; sent_count: number }>('/notifications/broadcast', {
+        method: 'POST',
+        body: { ...body, dry_run: true },
+      }),
+  })
+}

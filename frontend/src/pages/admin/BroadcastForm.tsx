@@ -1,123 +1,201 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { useSendBroadcast } from '@/api/notifications';
-import { Megaphone, Send, Users } from 'lucide-react';
-import { message } from 'antd'; // Using antd for quick toasts to match existing aesthetic
+import { Button, Card, Form, Input, Select, Space, Typography, message } from 'antd'
+import { useMemo, useState } from 'react'
+import { useAuth } from '../../auth/useAuth'
+import { useAcademicCycles } from '../../api/academicCycles'
+import { useDepartments } from '../../api/departments'
+import { usePostingsList } from '../../api/postings'
+import { usePreviewBroadcast, useSendBroadcast } from '../../api/notifications'
 
-const BroadcastForm: React.FC = () => {
-  const [title, setTitle] = useState('');
-  const [msg, setMsg] = useState('');
-  const [discipline, setDiscipline] = useState('');
-  const [role, setRole] = useState('');
-  
-  const broadcastMutation = useSendBroadcast();
+const { Title, Text } = Typography
 
-  const handleSend = () => {
-    if (!title || !msg) {
-        message.warning("Title and message are required.");
-        return;
-    }
-    
-    broadcastMutation.mutate(
-      { title, message: msg, discipline: discipline || undefined, role: role || undefined },
-      {
-        onSuccess: (res: any) => {
-          message.success(`Broadcast sent to ${res.sent_count} user(s).`);
-          setTitle('');
-          setMsg('');
-          setDiscipline('');
-          setRole('');
-        },
-        onError: () => {
-          message.error("Failed to send broadcast.");
-        }
+type TargetRole = 'student' | 'tutor'
+type Discipline = 'medicine' | 'allied_health' | 'nursing' | 'training'
+
+type FormValues = {
+  title: string
+  message: string
+  target_role: TargetRole
+  discipline?: Discipline
+  academic_cycle_id?: string
+  department_id?: string
+  posting_id?: string
+}
+
+export default function BroadcastForm() {
+  const accessToken = useAuth((s) => s.accessToken)
+  const [form] = Form.useForm<FormValues>()
+  const [previewCount, setPreviewCount] = useState<number | null>(null)
+
+  const discipline = Form.useWatch('discipline', form)
+
+  const { data: cycles, isLoading: cyclesLoading } = useAcademicCycles(accessToken)
+  const { data: departments, isLoading: departmentsLoading } = useDepartments(accessToken, {
+    discipline,
+    limit: 200,
+    offset: 0,
+  })
+  const { data: postings, isLoading: postingsLoading } = usePostingsList(accessToken, {
+    discipline,
+    limit: 50,
+    offset: 0,
+  })
+
+  const previewMutation = usePreviewBroadcast()
+  const sendMutation = useSendBroadcast()
+
+  const cycleOptions = useMemo(
+    () => (cycles?.items ?? []).map((c) => ({ label: c.name, value: c.id })),
+    [cycles?.items],
+  )
+  const deptOptions = useMemo(
+    () => (departments?.items ?? []).map((d) => ({ label: d.name, value: d.id })),
+    [departments?.items],
+  )
+  const postingOptions = useMemo(
+    () => (postings?.items ?? []).map((p) => ({ label: p.title, value: p.id })),
+    [postings?.items],
+  )
+
+  const handlePreview = async () => {
+    try {
+      const values = await form.validateFields()
+      const res = await previewMutation.mutateAsync(values)
+      setPreviewCount(res.matched_count)
+      if (res.matched_count === 0) {
+        message.warning('No recipients matched. Try different filters or ensure users exist for that role.')
+      } else {
+        message.success(`Matched ${res.matched_count} user(s).`)
       }
-    );
-  };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Preview failed'
+      message.error(msg)
+    }
+  }
+
+  const handleSend = async () => {
+    try {
+      const values = await form.validateFields()
+      const res = await sendMutation.mutateAsync(values)
+      if (res.sent_count === 0) {
+        message.warning('No notifications were sent — zero recipients matched.')
+      } else {
+        message.success(`Broadcast sent to ${res.sent_count} user(s).`)
+      }
+      setPreviewCount(null)
+      form.resetFields()
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Send failed'
+      message.error(msg)
+    }
+  }
 
   return (
-    <div className="container mx-auto p-6 max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-primary flex items-center gap-3">
-          <Megaphone className="w-8 h-8 opacity-80" /> Admin Broadcasts
-        </h1>
-        <p className="text-muted-foreground mt-2 text-sm">Send urgent announcements to specific cohorts or all users.</p>
-      </div>
+    <div style={{ padding: 24, maxWidth: 900, margin: '0 auto' }}>
+      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <div>
+          <Title level={2} style={{ margin: 0 }}>
+            Admin Broadcasts
+          </Title>
+          <Text type="secondary">
+            Send in-app announcements to student or tutor groups. Only super admins can send. Recipients are all
+            active users in the selected role (optional filters narrow by profile or posting).
+          </Text>
+        </div>
 
-      <Card className="border-none shadow-premium glass">
-        <CardHeader className="border-b border-border/50 bg-muted/10">
-          <CardTitle className="text-lg">Compose Announcement</CardTitle>
-          <CardDescription>Broadcasts appear as high-priority in-app alerts.</CardDescription>
-        </CardHeader>
-        <CardContent className="p-6 space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="title" className="text-foreground">Title <span className="text-destructive">*</span></Label>
-            <Input 
-              id="title" 
-              placeholder="e.g., Mandatory App Update" 
-              value={title} 
-              onChange={e => setTitle(e.target.value)} 
-              maxLength={100}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="message" className="text-foreground">Message <span className="text-destructive">*</span></Label>
-            <Textarea 
-              id="message" 
-              placeholder="Type your announcement here..." 
-              value={msg} 
-              onChange={e => setMsg(e.target.value)} 
-              rows={4}
-            />
-          </div>
+        <Card>
+          <Form<FormValues>
+            form={form}
+            layout="vertical"
+            initialValues={{ target_role: 'student' }}
+            onValuesChange={() => setPreviewCount(null)}
+          >
+            <Form.Item
+              name="title"
+              label="Title"
+              rules={[{ required: true, message: 'Title is required' }]}
+            >
+              <Input maxLength={100} placeholder="e.g., Mandatory App Update" />
+            </Form.Item>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-border/50">
-            <div className="space-y-2">
-              <Label htmlFor="discipline" className="text-foreground flex items-center gap-1">
-                <Users className="w-4 h-4 text-muted-foreground" />
-                Target Discipline
-              </Label>
-              <Input 
-                id="discipline" 
-                placeholder="e.g., Medicine (Optional)" 
-                value={discipline} 
-                onChange={e => setDiscipline(e.target.value)} 
+            <Form.Item
+              name="message"
+              label="Message"
+              rules={[{ required: true, message: 'Message is required' }]}
+            >
+              <Input.TextArea rows={4} maxLength={2000} placeholder="Type your announcement here..." />
+            </Form.Item>
+
+            <Space size="large" wrap style={{ width: '100%' }}>
+              <Form.Item name="target_role" label="Target Role" rules={[{ required: true }]}>
+                <Select
+                  style={{ minWidth: 220 }}
+                  options={[
+                    { label: 'Students', value: 'student' },
+                    { label: 'Tutors', value: 'tutor' },
+                  ]}
+                />
+              </Form.Item>
+
+              <Form.Item name="discipline" label="Discipline (optional)">
+                <Select
+                  allowClear
+                  style={{ minWidth: 220 }}
+                  options={[
+                    { label: 'Medicine', value: 'medicine' },
+                    { label: 'Allied Health', value: 'allied_health' },
+                    { label: 'Nursing', value: 'nursing' },
+                    { label: 'Training', value: 'training' },
+                  ]}
+                />
+              </Form.Item>
+            </Space>
+
+            <Space size="large" wrap style={{ width: '100%' }}>
+              <Form.Item name="academic_cycle_id" label="Academic Cycle (optional)">
+                <Select
+                  allowClear
+                  loading={cyclesLoading}
+                  style={{ minWidth: 260 }}
+                  options={cycleOptions}
+                />
+              </Form.Item>
+
+              <Form.Item name="department_id" label="Department (optional)">
+                <Select
+                  allowClear
+                  loading={departmentsLoading}
+                  style={{ minWidth: 260 }}
+                  options={deptOptions}
+                />
+              </Form.Item>
+            </Space>
+
+            <Form.Item name="posting_id" label="Posting (optional)">
+              <Select
+                allowClear
+                loading={postingsLoading}
+                options={postingOptions}
+                placeholder="Select a posting to target (optional)"
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="role" className="text-foreground">Target Role</Label>
-              <select 
-                id="role"
-                value={role}
-                onChange={e => setRole(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="">All Roles</option>
-                <option value="Student">Students Only</option>
-                <option value="Tutor">Tutors Only</option>
-                <option value="HOD">HODs Only</option>
-              </select>
-            </div>
-          </div>
-        </CardContent>
-        <CardFooter className="bg-muted/10 border-t border-border/50 p-6 flex justify-between">
-           <p className="text-xs text-muted-foreground">This action cannot be undone.</p>
-           <Button 
-            onClick={handleSend} 
-            disabled={broadcastMutation.isPending || !title || !msg}
-            className="gap-2 shadow-sm font-semibold"
-           >
-             {broadcastMutation.isPending ? 'Sending...' : <><Send className="w-4 h-4" /> Send Broadcast</>}
-           </Button>
-        </CardFooter>
-      </Card>
-    </div>
-  );
-};
+            </Form.Item>
 
-export default BroadcastForm;
+            <Space>
+              <Button onClick={handlePreview} loading={previewMutation.isPending}>
+                Preview Recipients
+              </Button>
+              <Button
+                type="primary"
+                onClick={handleSend}
+                loading={sendMutation.isPending}
+                disabled={previewCount === 0}
+              >
+                Send Broadcast
+              </Button>
+              {previewCount !== null && <Text type="secondary">Matched: {previewCount}</Text>}
+            </Space>
+          </Form>
+        </Card>
+      </Space>
+    </div>
+  )
+}

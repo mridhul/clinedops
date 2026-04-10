@@ -5,8 +5,9 @@ from sqlalchemy import select, update, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.core import Notification, NotificationPreference
-from app.db.models.enums import NotificationType
+from app.db.models.enums import NotificationType, RoleEnum
 from app.tasks.notifications import send_email_notification_task
+from app.services.audit_service import record_audit
 
 class NotificationService:
     @staticmethod
@@ -41,6 +42,10 @@ class NotificationService:
 
         # Default to True if no preference set yet
         email_enabled = preference.email_enabled if preference else True
+
+        # Broadcasts are in-app only (no SES fan-out for mass sends).
+        if notification_type == NotificationType.BROADCAST:
+            email_enabled = False
 
         if email_enabled:
             # Trigger async email task
@@ -153,3 +158,126 @@ class NotificationService:
         
         await db.commit()
         return count
+
+    @staticmethod
+    async def resolve_broadcast_recipients(
+        db: AsyncSession,
+        *,
+        target_role: RoleEnum,
+        discipline: Optional[str] = None,
+        academic_cycle_id: Optional[uuid.UUID] = None,
+        department_id: Optional[uuid.UUID] = None,
+        posting_id: Optional[uuid.UUID] = None,
+    ) -> list[uuid.UUID]:
+        from app.db.models.user import User
+        from app.db.models.core import Posting, PostingTutor, Student, Tutor
+
+        # Without posting_id: target all active students/tutors (profile fields for filters).
+        # With posting_id: narrow to users linked to that posting (posting row filters).
+        if target_role.value == RoleEnum.student.value:
+            if posting_id is not None:
+                stmt = (
+                    select(User.id)
+                    .join(Student, Student.user_id == User.id)
+                    .join(Posting, Posting.student_id == Student.id)
+                    .where(User.is_active.is_(True))
+                    .where(Posting.is_active.is_(True))
+                    .where(Student.is_active.is_(True))
+                    .where(User.role == RoleEnum.student.value)
+                    .where(Posting.id == posting_id)
+                )
+                if discipline:
+                    stmt = stmt.where(Posting.discipline == discipline)
+                if academic_cycle_id:
+                    stmt = stmt.where(Posting.academic_cycle_id == academic_cycle_id)
+                if department_id:
+                    stmt = stmt.where(Posting.department_id == department_id)
+            else:
+                stmt = (
+                    select(User.id)
+                    .join(Student, Student.user_id == User.id)
+                    .where(User.is_active.is_(True))
+                    .where(Student.is_active.is_(True))
+                    .where(User.role == RoleEnum.student.value)
+                )
+                if discipline:
+                    stmt = stmt.where(Student.discipline == discipline)
+                if academic_cycle_id:
+                    stmt = stmt.where(Student.academic_cycle_id == academic_cycle_id)
+                if department_id:
+                    stmt = stmt.where(Student.department_id == department_id)
+        elif target_role.value == RoleEnum.tutor.value:
+            if posting_id is not None:
+                stmt = (
+                    select(User.id)
+                    .join(Tutor, Tutor.user_id == User.id)
+                    .join(PostingTutor, PostingTutor.tutor_id == Tutor.id)
+                    .join(Posting, Posting.id == PostingTutor.posting_id)
+                    .where(User.is_active.is_(True))
+                    .where(Posting.is_active.is_(True))
+                    .where(Tutor.is_active.is_(True))
+                    .where(PostingTutor.is_active.is_(True))
+                    .where(User.role == RoleEnum.tutor.value)
+                    .where(Posting.id == posting_id)
+                )
+                if discipline:
+                    stmt = stmt.where(Posting.discipline == discipline)
+                if academic_cycle_id:
+                    stmt = stmt.where(Posting.academic_cycle_id == academic_cycle_id)
+                if department_id:
+                    stmt = stmt.where(Posting.department_id == department_id)
+            else:
+                stmt = (
+                    select(User.id)
+                    .join(Tutor, Tutor.user_id == User.id)
+                    .where(User.is_active.is_(True))
+                    .where(Tutor.is_active.is_(True))
+                    .where(User.role == RoleEnum.tutor.value)
+                )
+                if discipline:
+                    stmt = stmt.where(Tutor.discipline == discipline)
+                if academic_cycle_id:
+                    stmt = stmt.where(Tutor.academic_cycle_id == academic_cycle_id)
+                if department_id:
+                    stmt = stmt.where(Tutor.department_id == department_id)
+        else:
+            # v1 supports student/tutor only
+            return []
+
+        rows = (await db.execute(stmt)).scalars().all()
+        return list({uid for uid in rows})
+
+    @staticmethod
+    async def send_broadcast_to_users(
+        db: AsyncSession,
+        *,
+        actor,
+        user_ids: list[uuid.UUID],
+        title: str,
+        message: str,
+        criteria: dict,
+    ) -> int:
+        sent = 0
+        for u_id in user_ids:
+            await NotificationService.create_notification(
+                db,
+                u_id,
+                NotificationType.BROADCAST,
+                title,
+                message,
+                data={"criteria": criteria},
+            )
+            sent += 1
+
+        await record_audit(
+            db,
+            actor_id=actor.id,
+            action="CREATE",
+            entity_type="broadcast",
+            entity_id=None,
+            before_state=None,
+            after_state={"sent_count": sent, **criteria},
+        )
+
+        await db.commit()
+        return sent

@@ -26,6 +26,8 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     full_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    profile_photo_url: Mapped[Optional[str]] = mapped_column(String(1024), nullable=True)
+    title: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
 
     # Scaffold: store enum-like fields as TEXT (migrations will create real ENUMs later).
     role: Mapped[str] = mapped_column(String(50), nullable=False)

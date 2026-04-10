@@ -34,3 +34,7 @@ export function useMe(accessToken: string | null) {
   })
 }
 
+export async function fetchMe(accessToken: string): Promise<MeResponse> {
+  return apiFetch<MeResponse>('/auth/me', { accessToken })
+}
+

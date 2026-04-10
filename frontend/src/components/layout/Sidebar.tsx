@@ -7,7 +7,9 @@ import {
   HelpCircle, 
   LogOut,
   Plus,
-  Shield
+  Shield,
+  Bell,
+  Megaphone,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -27,11 +29,14 @@ const Sidebar: React.FC = () => {
   const isTutor = profile?.role === 'tutor';
   const isStudent = profile?.role === 'student';
   const isAdmin = profile?.role === 'super_admin' || profile?.role === 'programme_admin';
+  const isSuperAdmin = profile?.role === 'super_admin';
   const isSupervisor = profile?.role === 'supervisor';
   const canSeeSessions = isTutor || isSupervisor || isAdmin;
+  const canSeeReports = isSupervisor || isAdmin;
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Overview', href: '/dashboard', show: true },
+    { icon: Bell, label: 'Notifications', href: '/dashboard/notifications', show: true },
     { 
       icon: History, 
       label: isStudent ? 'My Sessions' : 'Teaching Sessions', 
@@ -52,8 +57,14 @@ const Sidebar: React.FC = () => {
     },
     { icon: LayoutDashboard, label: 'Templates', href: '/dashboard/surveys/templates', show: isAdmin },
     { icon: Users, label: 'User Management', href: '/dashboard/students', show: isAdmin },
-    { icon: BarChart3, label: 'Reports', href: '/dashboard/reports', show: isAdmin },
+    { icon: BarChart3, label: 'Reports', href: '/dashboard/reports', show: canSeeReports },
     { icon: Shield, label: 'Admin Console', href: '/dashboard/admin', show: isAdmin },
+    {
+      icon: Megaphone,
+      label: 'Broadcasts',
+      href: '/dashboard/admin/broadcast',
+      show: isSuperAdmin,
+    },
   ];
 
   return (

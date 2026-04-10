@@ -37,6 +37,7 @@ import TutorFeedbackPage from './pages/surveys/TutorFeedbackPage'
 import ReportsPage from './pages/reports/ReportsPage'
 import NotificationsPage from './pages/notifications/NotificationsPage'
 import NotificationSettingsPage from './pages/settings/NotificationSettingsPage'
+import ProfilePage from './pages/settings/ProfilePage'
 import BroadcastForm from './pages/admin/BroadcastForm'
 
 import './theme/global.css'
@@ -116,6 +117,7 @@ export default function App() {
                     {/* Spec 5: Notifications */}
                     <Route path="notifications" element={<NotificationsPage />} />
                     <Route path="settings/notifications" element={<NotificationSettingsPage />} />
+                    <Route path="settings/profile" element={<ProfilePage />} />
                     <Route path="admin/broadcast" element={<BroadcastForm />} />
                   </Routes>
                 </MainLayout>

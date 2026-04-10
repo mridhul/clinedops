@@ -23,6 +23,8 @@ services:
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
+      # Same path + volume as celery so generated report files are visible to the API.
+      REPORTS_STORAGE_DIR: /data/reports
       FRONTEND_ORIGIN: http://localhost:3000
       API_PREFIX: /api/v1
       JWT_ISSUER: clinedops
@@ -39,6 +41,7 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - reports_data:/data/reports
 
   celery:
     build:
@@ -49,6 +52,7 @@ services:
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
+      REPORTS_STORAGE_DIR: /data/reports
       FRONTEND_ORIGIN: http://localhost:3000
       API_PREFIX: /api/v1
       JWT_ISSUER: clinedops
@@ -60,6 +64,8 @@ services:
     depends_on:
       - db
       - redis
+    volumes:
+      - reports_data:/data/reports
 
   frontend:
     build:
@@ -83,4 +89,5 @@ services:
 
 volumes:
   db_data:
+  reports_data:
 

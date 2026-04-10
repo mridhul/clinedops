@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Optional, Dict, Any, List
 from uuid import UUID
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from app.db.models.enums import NotificationType
+from app.db.models.enums import RoleEnum
 
 class NotificationRead(BaseModel):
     id: UUID
@@ -33,3 +34,19 @@ class NotificationPreferenceUpdate(BaseModel):
 
 class NotificationPreferencesUpdate(BaseModel):
     preferences: List[NotificationPreferenceUpdate]
+
+
+class BroadcastCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=100)
+    message: str = Field(min_length=1, max_length=2000)
+    target_role: RoleEnum
+    discipline: Optional[str] = None
+    academic_cycle_id: Optional[UUID] = None
+    department_id: Optional[UUID] = None
+    posting_id: Optional[UUID] = None
+    dry_run: bool = False
+
+
+class BroadcastResult(BaseModel):
+    matched_count: int
+    sent_count: int

@@ -5,6 +5,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.api.v1.deps import get_current_user, require_roles
 from app.db.models import User
@@ -135,4 +136,19 @@ async def get_tutor_feedback(
     actor: User = Depends(get_current_user)
 ) -> Envelope[TutorFeedbackSummary]:
     summary = await SurveyService.get_tutor_feedback_summary(db, tutor_id=tutor_id)
+    return Envelope(data=summary)
+
+
+@router.get("/my/feedback", response_model=Envelope[TutorFeedbackSummary])
+async def get_my_tutor_feedback(
+    db: AsyncSession = Depends(get_db_session),
+    actor: User = Depends(require_roles([RoleEnum.tutor])),
+) -> Envelope[TutorFeedbackSummary]:
+    from app.db.models import Tutor
+
+    tutor = (await db.execute(select(Tutor).where(Tutor.user_id == actor.id, Tutor.is_active.is_(True)))).scalars().first()
+    if tutor is None:
+        raise HTTPException(status_code=400, detail="Tutor profile not found")
+
+    summary = await SurveyService.get_tutor_feedback_summary(db, tutor_id=tutor.id)
     return Envelope(data=summary)
