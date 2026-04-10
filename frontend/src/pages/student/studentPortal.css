@@ -1,0 +1,117 @@
+.cd-student-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  height: var(--cd-spacing-12);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--cd-spacing-10);
+}
+
+.cd-student-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--cd-spacing-3);
+}
+
+.cd-student-avatar {
+  border-radius: var(--cd-rounded-full);
+  overflow: hidden;
+}
+
+.cd-student-sider {
+  padding-top: var(--cd-spacing-12);
+  background: var(--cd-surface-container-low);
+  display: none;
+}
+
+.cd-student-content {
+  padding-top: var(--cd-spacing-12);
+  padding-left: var(--cd-spacing-4);
+  padding-right: var(--cd-spacing-4);
+  padding-bottom: var(--cd-spacing-10);
+}
+
+.cd-student-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--cd-spacing-10);
+  margin: 0 auto;
+}
+
+@media (min-width: 992px) {
+  .cd-student-grid {
+    grid-template-columns: 60% 40%;
+  }
+}
+
+.cd-student-sider {
+  /* Only show the sidebar on desktop */
+}
+
+@media (min-width: 992px) {
+  .cd-student-sider {
+    display: block;
+  }
+}
+
+.cd-student-mobile-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: none;
+  align-items: center;
+  justify-content: space-around;
+  height: var(--cd-spacing-12);
+  padding: 0 var(--cd-spacing-4);
+}
+
+.cd-student-timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cd-spacing-4);
+  padding: var(--cd-spacing-3);
+  border-radius: var(--cd-rounded-md);
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.cd-student-timeline-item:hover {
+  background: var(--cd-surface-container-low);
+}
+
+.cd-student-quick-action-tile {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cd-spacing-3);
+  padding: var(--cd-spacing-4);
+  border-radius: var(--cd-rounded-md);
+  background: var(--cd-surface-container-highest);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.cd-student-quick-action-tile:hover {
+  box-shadow: var(--cd-shadow-standard);
+}
+
+@media (max-width: 991px) {
+  .cd-student-mobile-nav {
+    display: flex;
+  }
+}
+
+.cd-student-desktop-only {
+  display: none;
+}
+
+@media (min-width: 992px) {
+  .cd-student-desktop-only {
+    display: block;
+  }
+}
+

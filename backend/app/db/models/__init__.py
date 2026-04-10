@@ -4,17 +4,26 @@ from app.db.models.core import (
     Department,
     ImportBatch,
     Notification,
+    NotificationPreference,
     Posting,
     PostingTutor,
     ReportDefinition,
+    ReportExecution,
+    ReportSchedule,
     SessionStudent,
     Student,
+    SurveyAssignment,
+    SurveyReminder,
     SurveySubmission,
     SurveyTemplate,
+    SystemSettings,
+    RolePermission,
     TeachingSession,
     Tutor,
+    TutorBillableRate,
 )
 from app.db.models.user import User
+from app.db.models.shadowing import JobShadowingApplication, MentorAssignment
 
 __all__ = [
     "User",
@@ -27,10 +36,20 @@ __all__ = [
     "TeachingSession",
     "SessionStudent",
     "SurveyTemplate",
+    "SurveyAssignment",
     "SurveySubmission",
+    "SurveyReminder",
     "AuditLog",
     "Notification",
+    "NotificationPreference",
     "ImportBatch",
     "ReportDefinition",
+    "ReportExecution",
+    "ReportSchedule",
+    "TutorBillableRate",
+    "SystemSettings",
+    "RolePermission",
+    "JobShadowingApplication",
+    "MentorAssignment",
 ]
 

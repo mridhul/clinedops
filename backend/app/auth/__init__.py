@@ -1,0 +1,2 @@
+"""FastAPI-Users integration wiring."""
+

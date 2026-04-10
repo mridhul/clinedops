@@ -4,7 +4,7 @@ import os
 from typing import AsyncIterator, Generator
 
 import pytest
-from httpx import AsyncClient
+from httpx import ASGITransport, AsyncClient
 
 
 def _ensure_jwt_keys() -> None:
@@ -44,24 +44,28 @@ def app_settings() -> Generator[None, None, None]:
     yield None
 
 
+@pytest.fixture(scope="session", autouse=True)
+async def prepare_db(app_settings):
+    # Ensure engine and sessionmaker are fresh for the test session
+    from app.db import session as db_session
+    db_session._engine.cache_clear()
+    db_session._sessionmaker.cache_clear()
+    
+    # Import after env is ready and after alembic upgrade has already run in CI.
+    # from app.scripts.seed_demo_data import seed as seed_fn
+    # await seed_fn()
+    pass
+
+
 @pytest.fixture(scope="session")
 def app():
     # Import after env is prepared so cached Settings includes JWT keys.
     from app.main import create_app
-
     return create_app()
 
 
 @pytest.fixture
 async def client(app) -> AsyncIterator[AsyncClient]:
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
-
-
-@pytest.fixture(scope="session", autouse=True)
-async def seed_demo_db():
-    # Import after env is ready and after alembic upgrade has already run in CI.
-    from app.scripts.seed_demo_data import seed as seed_fn
-
-    await seed_fn()
-

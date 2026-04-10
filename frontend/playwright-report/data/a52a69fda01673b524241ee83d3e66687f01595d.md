@@ -1,0 +1,55 @@
+# Page snapshot
+
+```yaml
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - img "Clinical abstract" [ref=e6]
+    - generic [ref=e8]:
+      - img [ref=e10]
+      - heading "The Clinical Editorial" [level=1] [ref=e14]
+    - generic [ref=e15]:
+      - heading "Advancing Medical Excellence through Curated Evidence." [level=2] [ref=e16]
+      - paragraph [ref=e17]: Access the world's most rigorous clinical curriculum and peer-reviewed case studies designed for modern practitioners.
+    - paragraph [ref=e19]: Institutional Partner Program
+  - generic [ref=e21]:
+    - generic [ref=e22]:
+      - heading "Sign In" [level=2] [ref=e23]
+      - paragraph [ref=e24]: Welcome back to The Clinical Editorial dashboard.
+    - generic [ref=e25]:
+      - generic [ref=e26]:
+        - generic [ref=e27]:
+          - text: Professional Email
+          - textbox "Professional Email" [ref=e28]:
+            - /placeholder: dr.smith@hospital.org
+        - generic [ref=e29]:
+          - generic [ref=e30]:
+            - generic [ref=e31]: Password
+            - link "Forgot?" [ref=e32] [cursor=pointer]:
+              - /url: "#"
+          - textbox "Password" [ref=e33]:
+            - /placeholder: ••••••••
+      - generic [ref=e34]:
+        - checkbox "Keep me signed in for 30 days" [ref=e35]
+        - checkbox
+        - generic [ref=e36] [cursor=pointer]: Keep me signed in for 30 days
+      - button "Sign In" [ref=e37]:
+        - generic [ref=e38]: Sign In
+        - img
+    - generic [ref=e42]: or continue with
+    - button "Login with Institution SSO" [ref=e43]:
+      - img
+      - generic [ref=e44]: Login with Institution SSO
+    - generic [ref=e45]:
+      - paragraph [ref=e46]:
+        - text: Don't have an account?
+        - link "Request institutional access" [ref=e47] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=e48]:
+        - link "Help Center" [ref=e49] [cursor=pointer]:
+          - /url: "#"
+        - link "Privacy Policy" [ref=e50] [cursor=pointer]:
+          - /url: "#"
+        - link "Terms" [ref=e51] [cursor=pointer]:
+          - /url: "#"
+  - paragraph [ref=e53]: "System Status: Operational • v2.4.1"
+```

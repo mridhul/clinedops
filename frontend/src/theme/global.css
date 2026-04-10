@@ -1,0 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Colors & surfaces (DESIGN.md) */
+  --cd-surface: #f8f9fb;
+  --cd-surface-container-low: #f1f4f7;
+  --cd-surface-container-lowest: #ffffff;
+  --cd-surface-bright: #f8f9fb;
+  --cd-surface-container-highest: #dbe4ea;
+  --cd-surface-transparent: rgba(248, 249, 251, 0.6);
+
+  --cd-primary: #005db6;
+  --cd-primary-dim: #0051a1;
+  --cd-secondary: #4f607c;
+
+  --cd-tertiary: #00687b;
+  --cd-tertiary-container: rgba(0, 104, 123, 0.12);
+  --cd-on-tertiary-container: #ffffff;
+
+  --cd-error: #9f403d;
+  --cd-on-error: #ffffff;
+
+  --cd-on-surface-variant: #586065;
+  --cd-on-surface: #2b3438;
+
+  --cd-outline-variant-base: #586065;
+  --cd-outline-variant-20: rgba(88, 96, 101, 0.2);
+
+  /* Borders are avoided; focus uses ghost-outline instead */
+  --cd-ghost-border-primary: 2px solid rgba(0, 93, 182, 0.2);
+
+  /* Shadows (DESIGN.md) */
+  --cd-shadow-standard: 0px 10px 30px rgba(43, 52, 56, 0.05);
+  --cd-shadow-floating: 0px 20px 50px rgba(43, 52, 56, 0.08);
+
+  /* Glassmorphism + gradients (DESIGN.md) */
+  --cd-glass-surface: rgba(248, 249, 251, 0.8);
+  --cd-glass-blur: 16px;
+  --cd-primary-gradient: linear-gradient(135deg, #005db6 0%, #0051a1 100%);
+
+  /* Typography (DESIGN.md) */
+  --cd-font-display-family: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --cd-font-body-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  --cd-font-size-body-md: 0.875rem; /* 14px */
+  --cd-font-size-label-sm: 0.6875rem; /* 11px */
+  --cd-font-weight-label-sm: 600;
+
+  /* Radii (DESIGN.md) */
+  --cd-rounded-md: 0.375rem;
+  --cd-rounded-full: 9999px;
+
+  /* Spacing (DESIGN.md) */
+  --cd-spacing-3: 0.75rem;
+  --cd-spacing-4: 0.9rem;
+  --cd-spacing-10: 2.25rem;
+  --cd-spacing-12: 2.75rem;
+
+  /* Layout grid (DESIGN.md) */
+  --cd-hero-left-percent: 60%;
+  --cd-hero-right-percent: 40%;
+}
+
+body {
+  background: var(--cd-surface);
+  color: var(--cd-on-surface);
+  font-family: var(--cd-font-body-family);
+}
+
+/* DESIGN.md: "No-line" rule forbids 1px divider lines.
+   Our existing scaffold had a 1px border on #root; remove it. */
+#root {
+  border-inline: none !important;
+}
+
+.cd-glass {
+  background: var(--cd-glass-surface);
+  backdrop-filter: blur(var(--cd-glass-blur));
+  -webkit-backdrop-filter: blur(var(--cd-glass-blur));
+}
+
+/* Primary CTA gradient */
+.ant-btn-primary {
+  border-color: transparent !important;
+  background-image: var(--cd-primary-gradient) !important;
+  background-color: transparent !important;
+  box-shadow: 0 4px 10px rgba(0, 93, 182, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 8px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  font-weight: 500;
+}
+
+.ant-btn-primary:hover {
+  box-shadow: 0 6px 15px rgba(0, 93, 182, 0.2), 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.ant-btn-primary:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(0, 93, 182, 0.15) !important;
+}
+
+/* Data tables: uppercase label-md headers + no divider lines */
+.ant-table-thead > tr > th {
+  border-bottom: none !important;
+  background: var(--cd-surface-container-low);
+  color: var(--cd-on-surface-variant) !important;
+  text-transform: uppercase;
+  font-size: var(--cd-font-size-label-sm) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em;
+  padding: 16px !important;
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom: 1px solid var(--cd-surface-container-highest) !important; /* Subtle separator */
+  padding-top: var(--cd-spacing-4) !important;
+  padding-bottom: var(--cd-spacing-4) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background-color: var(--cd-surface-container-low) !important;
+}
+
+/* Typography: use display typeface for Ant titles */
+.ant-typography-title,
+h1,
+h2, h3, h4, h5 {
+  font-family: var(--cd-font-display-family) !important;
+  letter-spacing: -0.01em;
+}
+
+/* Base form labels */
+.ant-form-item-label > label {
+  color: var(--cd-on-surface-variant) !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+  margin-bottom: 4px;
+}
+

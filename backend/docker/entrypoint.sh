@@ -50,7 +50,9 @@ asyncio.run(main())
 PY
 
 alembic upgrade head
-python -m app.scripts.seed_demo_data
+# Seed data if needed - disabled to avoid startup crashes. Use app.scripts.seed manually.
+# python -m app.scripts.seed_demo_data
+
 
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 

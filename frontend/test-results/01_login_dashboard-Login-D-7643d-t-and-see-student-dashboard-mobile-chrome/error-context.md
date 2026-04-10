@@ -1,0 +1,45 @@
+# Page snapshot
+
+```yaml
+- main [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - heading "Sign In" [level=2] [ref=e7]
+      - paragraph [ref=e8]: Welcome back to The Clinical Editorial dashboard.
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - text: Professional Email
+          - textbox "Professional Email" [ref=e12]:
+            - /placeholder: dr.smith@hospital.org
+        - generic [ref=e13]:
+          - generic [ref=e14]:
+            - generic [ref=e15]: Password
+            - link "Forgot?" [ref=e16] [cursor=pointer]:
+              - /url: "#"
+          - textbox "Password" [ref=e17]:
+            - /placeholder: ••••••••
+      - generic [ref=e18]:
+        - checkbox "Keep me signed in for 30 days" [ref=e19]
+        - checkbox
+        - generic [ref=e20] [cursor=pointer]: Keep me signed in for 30 days
+      - button "Sign In" [ref=e21]:
+        - generic [ref=e22]: Sign In
+        - img
+    - generic [ref=e26]: or continue with
+    - button "Login with Institution SSO" [ref=e27]:
+      - img
+      - generic [ref=e28]: Login with Institution SSO
+    - generic [ref=e29]:
+      - paragraph [ref=e30]:
+        - text: Don't have an account?
+        - link "Request institutional access" [ref=e31] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=e32]:
+        - link "Help Center" [ref=e33] [cursor=pointer]:
+          - /url: "#"
+        - link "Privacy Policy" [ref=e34] [cursor=pointer]:
+          - /url: "#"
+        - link "Terms" [ref=e35] [cursor=pointer]:
+          - /url: "#"
+```

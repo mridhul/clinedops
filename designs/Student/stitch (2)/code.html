@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Student Portal | Clinical Editorial</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-dim": "#0051a1",
+              "on-primary-fixed-variant": "#005ab1",
+              "tertiary": "#00687b",
+              "on-error": "#fff7f6",
+              "outline": "#737c81",
+              "surface-variant": "#dbe4ea",
+              "secondary-container": "#d6e3ff",
+              "surface-container-lowest": "#ffffff",
+              "on-surface": "#2b3438",
+              "on-primary-container": "#00519f",
+              "inverse-surface": "#0c0f10",
+              "primary-fixed": "#d6e3ff",
+              "primary-fixed-dim": "#c0d5ff",
+              "background": "#f8f9fb",
+              "tertiary-fixed-dim": "#56d0ed",
+              "on-tertiary-fixed-variant": "#005767",
+              "on-secondary-fixed-variant": "#4c5c78",
+              "inverse-on-surface": "#9b9d9f",
+              "secondary-dim": "#445470",
+              "tertiary-fixed": "#66defc",
+              "on-tertiary": "#effbff",
+              "surface-container-low": "#f1f4f7",
+              "surface-bright": "#f8f9fb",
+              "surface-tint": "#005db6",
+              "surface-container-highest": "#dbe4ea",
+              "on-surface-variant": "#586065",
+              "secondary": "#4f607c",
+              "on-secondary-container": "#42526e",
+              "surface": "#f8f9fb",
+              "inverse-primary": "#609efc",
+              "on-primary-fixed": "#003e7e",
+              "primary-container": "#d6e3ff",
+              "on-secondary-fixed": "#30405b",
+              "surface-dim": "#d1dce2",
+              "surface-container": "#eaeef2",
+              "surface-container-high": "#e2e9ee",
+              "on-error-container": "#752121",
+              "secondary-fixed": "#d6e3ff",
+              "on-tertiary-container": "#004d5b",
+              "error-container": "#fe8983",
+              "on-background": "#2b3438",
+              "error": "#9f403d",
+              "on-primary": "#f6f7ff",
+              "on-secondary": "#f8f8ff",
+              "secondary-fixed-dim": "#c4d5f7",
+              "on-tertiary-fixed": "#003843",
+              "tertiary-container": "#66defc",
+              "error-dim": "#4e0309",
+              "primary": "#005db6",
+              "tertiary-dim": "#005b6c",
+              "outline-variant": "#aab3b9"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-header {
+            background: rgba(248, 249, 251, 0.8);
+            backdrop-filter: blur(12px);
+        }
+        .clinical-shadow {
+            box-shadow: 0px 10px 30px rgba(43, 52, 56, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface min-h-screen">
+<!-- Top Navigation Shell -->
+<header class="fixed top-0 w-full z-50 glass-header shadow-sm flex justify-between items-center px-8 h-16">
+<div class="flex items-center gap-8">
+<span class="text-xl font-extrabold text-blue-800 tracking-tighter font-headline">Clinical Editorial</span>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="font-headline font-bold text-lg tracking-tight text-blue-700 border-b-2 border-blue-600 pb-1" href="#">Dashboard</a>
+<a class="font-headline font-bold text-lg tracking-tight text-slate-600 hover:text-blue-600 transition-colors" href="#">Teaching Hours</a>
+<a class="font-headline font-bold text-lg tracking-tight text-slate-600 hover:text-blue-600 transition-colors" href="#">Surveys</a>
+<a class="font-headline font-bold text-lg tracking-tight text-slate-600 hover:text-blue-600 transition-colors" href="#">Reports</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-600 hover:bg-slate-100/50 rounded-full transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-slate-600 hover:bg-slate-100/50 rounded-full transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden bg-surface-variant">
+<img alt="User profile" class="h-full w-full object-cover" data-alt="Professional male medical student profile portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBM0MWy4ujaFxZQ0fXmXiQnWoIZ5au4a-j41EeBa5bHzBJti1bIZHeoilak0DgURK5sAAXU6H_LQxlend-aEYPhr1xnLGUj7evgzF5bC0M2eoY5DiYNJzskHISgeQWknQV-51wfmif-jHAs2VWjj1zAzeXc7EVWupWgVe2_SthZCbE4mNQQXZslSVW2CwNB4urdD8nNiSjDicYqPtHqu6BfdWa_XkzXfkMdaJLRWWIb6gt5jQDRWB6wX2C35e527hlwLgu7DvV8hdQ"/>
+</div>
+</div>
+</header>
+<!-- Sidebar Shell (Mapped from SideNavBar) -->
+<aside class="hidden lg:flex h-screen w-64 fixed left-0 top-0 pt-20 flex-col bg-slate-100 border-r border-slate-200/20">
+<div class="px-8 mb-8">
+<h2 class="font-headline font-bold text-blue-900">Medical Affairs</h2>
+<p class="text-xs text-on-surface-variant">Clinical Curator</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 bg-white text-blue-700 shadow-sm rounded-l-full ml-4 pl-4 py-3 font-medium text-sm" href="#">
+<span class="material-symbols-outlined">dashboard</span> Overview
+            </a>
+<a class="flex items-center gap-3 text-slate-500 hover:text-slate-900 px-8 py-3 font-medium text-sm hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">history_edu</span> My Teaching
+            </a>
+<a class="flex items-center gap-3 text-slate-500 hover:text-slate-900 px-8 py-3 font-medium text-sm hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">poll</span> Survey Analytics
+            </a>
+<a class="flex items-center gap-3 text-slate-500 hover:text-slate-900 px-8 py-3 font-medium text-sm hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">group</span> User Management
+            </a>
+<a class="flex items-center gap-3 text-slate-500 hover:text-slate-900 px-8 py-3 font-medium text-sm hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">analytics</span> System Logs
+            </a>
+</nav>
+<div class="px-6 pb-6">
+<button class="w-full bg-gradient-to-br from-primary to-primary-dim text-on-primary py-3 rounded-md text-sm font-semibold hover:shadow-lg transition-all">
+                Log Teaching Hours
+            </button>
+</div>
+<div class="border-t border-slate-200/40 mt-auto py-4">
+<a class="flex items-center gap-3 text-slate-500 px-8 py-3 font-medium text-sm hover:text-slate-900" href="#">
+<span class="material-symbols-outlined">help</span> Help Center
+            </a>
+<a class="flex items-center gap-3 text-slate-500 px-8 py-3 font-medium text-sm hover:text-error" href="#">
+<span class="material-symbols-outlined">logout</span> Sign Out
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:pl-64 pt-24 pb-12 px-8 max-w-[1440px] mx-auto">
+<!-- Welcome Section -->
+<section class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10">
+<div>
+<h1 class="font-headline text-3xl font-extrabold tracking-tight text-on-surface">Good Morning, Bryan</h1>
+<p class="text-on-surface-variant text-sm mt-1">Current Posting: <span class="text-primary font-semibold">General Surgery (Phase 3)</span></p>
+</div>
+<div class="flex items-center gap-4 bg-surface-container-low p-4 rounded-xl clinical-shadow">
+<div class="h-10 w-10 bg-surface-container-highest flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-primary">school</span>
+</div>
+<div>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Institution</p>
+<p class="text-sm font-bold text-on-surface">National University of Singapore (NUS)</p>
+</div>
+</div>
+</section>
+<!-- Asymmetric Bento Grid -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Left Column (Hero Content) -->
+<div class="col-span-12 lg:col-span-8 space-y-8">
+<!-- My Schedule / Current Rotation -->
+<div class="bg-surface-container-lowest rounded-xl clinical-shadow overflow-hidden">
+<div class="p-6 flex justify-between items-center bg-surface-container-low/50">
+<h3 class="font-headline font-bold text-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">calendar_today</span> My Schedule
+                        </h3>
+<span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Week 4 of 8</span>
+</div>
+<div class="p-6">
+<div class="flex flex-wrap gap-4">
+<!-- Rotation Card -->
+<div class="flex-1 min-w-[300px] border-l-4 border-primary bg-surface-container-low p-5 rounded-r-xl">
+<p class="text-xs font-bold text-primary uppercase tracking-widest mb-1">Active Rotation</p>
+<h4 class="text-xl font-bold font-headline mb-4">Gastrointestinal Surgery Unit</h4>
+<div class="grid grid-cols-2 gap-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full overflow-hidden">
+<img alt="Tutor" class="h-full w-full object-cover" data-alt="Middle-aged male surgeon in clinical attire" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDukTlLCN0eXPszELnnl3B9mgnhAT1ODujXOKXmlnoKZe4VUh52rNuhIfnswaRclUtT6cYJmvdgZtHRUha5tlHXDe6aYD4VrDjiv47oiNTDwb6oeQiNPJ44R_kmxBN6v2VicscS8OP5jzy24HkBCy_cQ1E4V23Mv74pmomf27QyCbozvdjRuuLy6-9jIOteml4OkLeL8gc70TIg3_EqrGqICQNcpApGm_5PxmfaL89RlJ44TDH--mpDS8HNQo5fcpEmhrCbKz6sIfo"/>
+</div>
+<div>
+<p class="text-[10px] text-on-surface-variant font-semibold">Lead Tutor</p>
+<p class="text-sm font-bold">Dr. Sarah Chen</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">location_on</span>
+</div>
+<div>
+<p class="text-[10px] text-on-surface-variant font-semibold">Location</p>
+<p class="text-sm font-bold">NUH Ward 5A</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Daily Timeline Preview -->
+<div class="mt-8">
+<h5 class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-4">Today's Agenda</h5>
+<div class="space-y-4">
+<div class="flex items-start gap-4 p-3 hover:bg-surface-container-low rounded-lg transition-colors cursor-pointer">
+<span class="text-xs font-bold text-primary w-12 pt-1">08:00</span>
+<div class="flex-1">
+<p class="text-sm font-bold">Morning Ward Rounds</p>
+<p class="text-xs text-on-surface-variant">Meeting Point: Nurse Station 5A</p>
+</div>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</div>
+<div class="flex items-start gap-4 p-3 hover:bg-surface-container-low rounded-lg transition-colors cursor-pointer">
+<span class="text-xs font-bold text-primary w-12 pt-1">11:30</span>
+<div class="flex-1">
+<p class="text-sm font-bold">Case Presentation: Appendicitis</p>
+<p class="text-xs text-on-surface-variant">Seminar Room 2, Level 3</p>
+</div>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Teaching History Table -->
+<div class="bg-surface-container-lowest rounded-xl clinical-shadow overflow-hidden">
+<div class="p-6 flex justify-between items-center">
+<h3 class="font-headline font-bold text-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">history</span> Teaching History
+                        </h3>
+<a class="text-xs font-bold text-primary hover:underline" href="#">View All Logbook</a>
+</div>
+<div class="px-6 pb-6 overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low border-b-0">
+<tr>
+<th class="py-3 px-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest rounded-l-lg">Date</th>
+<th class="py-3 px-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Clinical Interaction</th>
+<th class="py-3 px-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest text-center">Hours</th>
+<th class="py-3 px-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest rounded-r-lg">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-low">
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="py-4 px-4 text-sm font-medium">Oct 24, 2023</td>
+<td class="py-4 px-4">
+<p class="text-sm font-bold">Bedside Ultrasound Clinic</p>
+<p class="text-[10px] text-on-surface-variant">Tutor: Dr. Marcus Lim</p>
+</td>
+<td class="py-4 px-4 text-sm text-center font-bold">2.5</td>
+<td class="py-4 px-4">
+<span class="px-2 py-1 bg-tertiary-container text-on-tertiary-container rounded-full text-[10px] font-bold uppercase tracking-tighter">Verified</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="py-4 px-4 text-sm font-medium">Oct 22, 2023</td>
+<td class="py-4 px-4">
+<p class="text-sm font-bold">OPD Observation - Hernia Repair</p>
+<p class="text-[10px] text-on-surface-variant">Tutor: Dr. Sarah Chen</p>
+</td>
+<td class="py-4 px-4 text-sm text-center font-bold">3.0</td>
+<td class="py-4 px-4">
+<span class="px-2 py-1 bg-surface-container-highest text-on-surface-variant rounded-full text-[10px] font-bold uppercase tracking-tighter">Pending</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Right Column (Contextual Content) -->
+<div class="col-span-12 lg:col-span-4 space-y-8">
+<!-- Pending Surveys (Curated Fatigue-Reduction) -->
+<div class="bg-gradient-to-br from-tertiary to-tertiary-dim p-1 rounded-xl shadow-md">
+<div class="bg-surface-container-lowest rounded-lg p-6">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-tertiary">rate_review</span>
+<h3 class="font-headline font-bold text-lg text-on-surface">Survey Pulse</h3>
+</div>
+<p class="text-sm text-on-surface-variant mb-6">We've batched your recent interactions to save you time. One survey for all last week's GS Unit sessions.</p>
+<div class="space-y-4">
+<div class="p-4 bg-tertiary/5 border border-tertiary/10 rounded-xl">
+<div class="flex justify-between items-start mb-2">
+<h4 class="text-sm font-bold">General Surgery Weekly Batch</h4>
+<span class="px-2 py-0.5 bg-error-container text-on-error-container rounded-full text-[9px] font-bold">Action Required</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-4">Includes interactions with Dr. Chen and Dr. Lim (3 sessions).</p>
+<button class="w-full py-2 bg-tertiary text-on-tertiary rounded-md text-xs font-bold flex items-center justify-center gap-2 hover:bg-tertiary-dim transition-colors">
+                                    Start Batch Survey <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Personal Stats / Progress -->
+<div class="bg-surface-container-lowest rounded-xl clinical-shadow p-6">
+<h3 class="font-headline font-bold text-lg mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">analytics</span> Posting Progress
+                    </h3>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs font-bold text-on-surface-variant">Teaching Hours Logged</span>
+<span class="text-xs font-bold text-primary">24 / 40h</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 60%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs font-bold text-on-surface-variant">Feedback Rate</span>
+<span class="text-xs font-bold text-tertiary">92%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-tertiary" style="width: 92%"></div>
+</div>
+</div>
+</div>
+<div class="mt-8 p-4 bg-primary-container/30 rounded-xl border border-primary-container/50">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">tips_and_updates</span>
+<div>
+<p class="text-xs font-bold text-on-primary-container">Clinical Insight</p>
+<p class="text-[11px] text-on-secondary-container mt-1">You're 2 hours ahead of the average for Phase 3! Great job keeping up with the logbook.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Actions -->
+<div class="grid grid-cols-2 gap-4">
+<button class="flex flex-col items-center justify-center gap-2 p-4 bg-surface-container-high hover:bg-surface-container-highest rounded-xl transition-colors">
+<span class="material-symbols-outlined text-primary">description</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter">Resources</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-2 p-4 bg-surface-container-high hover:bg-surface-container-highest rounded-xl transition-colors">
+<span class="material-symbols-outlined text-primary">mail</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter">Contact Tutors</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full glass-header flex justify-around items-center h-16 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-50 px-4">
+<a class="flex flex-col items-center text-blue-700" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-[10px] font-bold">Home</span>
+</a>
+<a class="flex flex-col items-center text-slate-500" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="text-[10px] font-bold">Schedule</span>
+</a>
+<a class="flex flex-col items-center text-slate-500" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="text-[10px] font-bold">Logs</span>
+</a>
+<a class="flex flex-col items-center text-slate-500" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold">Profile</span>
+</a>
+</nav>
+</body></html>

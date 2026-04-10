@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import datetime
 
 from sqlalchemy import select
 
@@ -21,120 +22,128 @@ SEED_PASSWORD = "DemoPassword1!"
 
 async def seed() -> None:
     async for session in get_db_session():
-        # Idempotency guard
-        result = await session.execute(select(User).where(User.email == SEED_SUPER_ADMIN_EMAIL))
-        existing = result.scalar_one_or_none()
-        if existing is not None:
-            return
-
-        # Departments + cycle
-        cycle = AcademicCycleModel(
-            name="2025/26",
-            start_date=None,
-            end_date=None,
-            created_by=None,
-        )
-        session.add(cycle)
-
-        departments: dict[DisciplineEnum, DepartmentModel] = {}
-        for discipline in DisciplineEnum:
-            dept = DepartmentModel(
-                name=f"{discipline.value.capitalize()} Department",
-                discipline=discipline.value,
+        # Idempotency guard for cycle
+        result = await session.execute(select(AcademicCycleModel).where(AcademicCycleModel.name == "2025/26"))
+        cycle = result.scalar_one_or_none()
+        if cycle is None:
+            cycle = AcademicCycleModel(
+                name="2025/26",
+                start_date=None,
+                end_date=None,
+                is_current=True,
                 created_by=None,
             )
-            session.add(dept)
-            departments[discipline] = dept
+            session.add(cycle)
+            await session.flush()
 
+        # Departments
+        departments: dict[str, DepartmentModel] = {}
+        for discipline in DisciplineEnum:
+            result = await session.execute(
+                select(DepartmentModel).where(DepartmentModel.discipline == discipline.value)
+            )
+            dept = result.scalar_one_or_none()
+            if dept is None:
+                dept = DepartmentModel(
+                    name=f"{discipline.value.capitalize()} Department",
+                    discipline=discipline.value,
+                    created_by=None,
+                )
+                session.add(dept)
+            departments[discipline.value] = dept
         await session.flush()
 
-        def add_user(*, email: str, role: RoleEnum, discipline: DisciplineEnum | None) -> User:
-            user = User(
-                email=email,
-                hashed_password=hash_password(SEED_PASSWORD),
-                full_name=email.split("@")[0],
-                role=role.value,
-                discipline=discipline.value if discipline else None,
-                is_active=True,
-                is_superuser=(role == RoleEnum.super_admin),
-                is_verified=True,
-                created_by=None,
-            )
-            session.add(user)
+        async def get_or_create_user(*, email: str, role: RoleEnum, discipline: Optional[DisciplineEnum]) -> User:
+            result = await session.execute(select(User).where(User.email == email))
+            user = result.scalar_one_or_none()
+            if user is None:
+                user = User(
+                    email=email,
+                    hashed_password=hash_password(SEED_PASSWORD),
+                    full_name=email.split("@")[0],
+                    role=role.value,
+                    discipline=discipline.value if discipline else None,
+                    is_active=True,
+                    is_superuser=(role == RoleEnum.super_admin),
+                    is_verified=True,
+                    created_by=None,
+                )
+                session.add(user)
+                await session.flush()
             return user
 
         # Users
-        _ = add_user(email=SEED_SUPER_ADMIN_EMAIL, role=RoleEnum.super_admin, discipline=None)
+        admin_user = await get_or_create_user(email=SEED_SUPER_ADMIN_EMAIL, role=RoleEnum.super_admin, discipline=None)
 
-        _ = add_user(
+        _ = await get_or_create_user(
             email="programme_admin_medicine@example.com",
             role=RoleEnum.programme_admin,
             discipline=DisciplineEnum.medicine,
         )
-        _ = add_user(
-            email="programme_admin_nursing@example.com",
-            role=RoleEnum.programme_admin,
-            discipline=DisciplineEnum.nursing,
-        )
+        
+        supervisor_med = await get_or_create_user(email="supervisor_medicine@example.com", role=RoleEnum.supervisor, discipline=DisciplineEnum.medicine)
 
-        _ = add_user(email="supervisor_medicine@example.com", role=RoleEnum.supervisor, discipline=DisciplineEnum.medicine)
-        _ = add_user(email="supervisor_training@example.com", role=RoleEnum.supervisor, discipline=DisciplineEnum.training)
+        tutor_med_user = await get_or_create_user(email="tutor_medicine@example.com", role=RoleEnum.tutor, discipline=DisciplineEnum.medicine)
+        
+        student_med_user = await get_or_create_user(email=SEED_STUDENT_EMAIL, role=RoleEnum.student, discipline=DisciplineEnum.medicine)
 
-        tutor_med = add_user(email="tutor_medicine@example.com", role=RoleEnum.tutor, discipline=DisciplineEnum.medicine)
-        tutor_allied = add_user(
-            email="tutor_allied_health@example.com",
-            role=RoleEnum.tutor,
-            discipline=DisciplineEnum.allied_health,
-        )
-        tutor_nursing = add_user(email="tutor_nursing@example.com", role=RoleEnum.tutor, discipline=DisciplineEnum.nursing)
-
-        students: list[User] = [
-            add_user(email="student1@example.com", role=RoleEnum.student, discipline=DisciplineEnum.medicine),
-            add_user(email="student2@example.com", role=RoleEnum.student, discipline=DisciplineEnum.medicine),
-            add_user(email="student3@example.com", role=RoleEnum.student, discipline=DisciplineEnum.allied_health),
-            add_user(email="student4@example.com", role=RoleEnum.student, discipline=DisciplineEnum.allied_health),
-            add_user(email="student5@example.com", role=RoleEnum.student, discipline=DisciplineEnum.nursing),
-        ]
-
-        await session.flush()
-
-        # Create tutor/student rows (minimal scaffolding)
-        tutors = [
-            TutorModel(
-                user_id=tutor_med.id,
-                department_id=departments[DisciplineEnum.medicine].id,
+        # Profiles
+        result = await session.execute(select(TutorModel).where(TutorModel.user_id == tutor_med_user.id))
+        tutor_med = result.scalar_one_or_none()
+        if tutor_med is None:
+            tutor_med = TutorModel(
+                user_id=tutor_med_user.id,
+                tutor_code="TUT-MED-001",
+                department_id=departments[DisciplineEnum.medicine.value].id,
                 academic_cycle_id=cycle.id,
                 discipline=DisciplineEnum.medicine.value,
                 created_by=None,
-            ),
-            TutorModel(
-                user_id=tutor_allied.id,
-                department_id=departments[DisciplineEnum.allied_health].id,
-                academic_cycle_id=cycle.id,
-                discipline=DisciplineEnum.allied_health.value,
-                created_by=None,
-            ),
-            TutorModel(
-                user_id=tutor_nursing.id,
-                department_id=departments[DisciplineEnum.nursing].id,
-                academic_cycle_id=cycle.id,
-                discipline=DisciplineEnum.nursing.value,
-                created_by=None,
-            ),
-        ]
-        session.add_all(tutors)
+            )
+            session.add(tutor_med)
 
-        student_rows = [
-            StudentModel(
-                user_id=s.id,
-                department_id=departments[DisciplineEnum(s.discipline)].id if s.discipline else None,
+        result = await session.execute(select(StudentModel).where(StudentModel.user_id == student_med_user.id))
+        student_med = result.scalar_one_or_none()
+        if student_med is None:
+            student_med = StudentModel(
+                user_id=student_med_user.id,
+                student_code="STU-MED-001",
+                institution="National University of Singapore",
+                lifecycle_status="active_posting",
+                department_id=departments[DisciplineEnum.medicine.value].id,
                 academic_cycle_id=cycle.id,
-                discipline=s.discipline or DisciplineEnum.medicine.value,
+                discipline=DisciplineEnum.medicine.value,
                 created_by=None,
             )
-            for s in students
-        ]
-        session.add_all(student_rows)
+            session.add(student_med)
+        
+        await session.flush()
+
+        # Posting
+        from app.db.models.core import Posting as PostingModel
+        result = await session.execute(select(PostingModel).where(PostingModel.title == "General Surgery Rotation"))
+        posting = result.scalar_one_or_none()
+        if posting is None:
+            posting = PostingModel(
+                title="General Surgery Rotation",
+                student_id=student_med.id,
+                academic_cycle_id=cycle.id,
+                department_id=departments[DisciplineEnum.medicine.value].id,
+                discipline=DisciplineEnum.medicine.value,
+                start_date=datetime.date.today() - datetime.timedelta(days=7),
+                end_date=datetime.date.today() + datetime.timedelta(days=21),
+                created_by=None,
+            )
+            session.add(posting)
+            await session.flush()
+            
+            # Link tutor
+            from app.db.models.core import PostingTutor
+            pt = PostingTutor(
+                posting_id=posting.id,
+                tutor_id=tutor_med.id,
+                created_by=None,
+            )
+            session.add(pt)
 
         await session.commit()
 
@@ -145,4 +154,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clinical Editorial - Tutor Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-dim": "#0051a1",
+                        "on-primary-fixed-variant": "#005ab1",
+                        "tertiary": "#00687b",
+                        "on-error": "#fff7f6",
+                        "outline": "#737c81",
+                        "surface-variant": "#dbe4ea",
+                        "secondary-container": "#d6e3ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#2b3438",
+                        "on-primary-container": "#00519f",
+                        "inverse-surface": "#0c0f10",
+                        "primary-fixed": "#d6e3ff",
+                        "primary-fixed-dim": "#c0d5ff",
+                        "background": "#f8f9fb",
+                        "tertiary-fixed-dim": "#56d0ed",
+                        "on-tertiary-fixed-variant": "#005767",
+                        "on-secondary-fixed-variant": "#4c5c78",
+                        "inverse-on-surface": "#9b9d9f",
+                        "secondary-dim": "#445470",
+                        "tertiary-fixed": "#66defc",
+                        "on-tertiary": "#effbff",
+                        "surface-container-low": "#f1f4f7",
+                        "surface-bright": "#f8f9fb",
+                        "surface-tint": "#005db6",
+                        "surface-container-highest": "#dbe4ea",
+                        "on-surface-variant": "#586065",
+                        "secondary": "#4f607c",
+                        "on-secondary-container": "#42526e",
+                        "surface": "#f8f9fb",
+                        "inverse-primary": "#609efc",
+                        "on-primary-fixed": "#003e7e",
+                        "primary-container": "#d6e3ff",
+                        "on-secondary-fixed": "#30405b",
+                        "surface-dim": "#d1dce2",
+                        "surface-container": "#eaeef2",
+                        "surface-container-high": "#e2e9ee",
+                        "on-error-container": "#752121",
+                        "secondary-fixed": "#d6e3ff",
+                        "on-tertiary-container": "#004d5b",
+                        "error-container": "#fe8983",
+                        "on-background": "#2b3438",
+                        "error": "#9f403d",
+                        "on-primary": "#f6f7ff",
+                        "on-secondary": "#f8f8ff",
+                        "secondary-fixed-dim": "#c4d5f7",
+                        "on-tertiary-fixed": "#003843",
+                        "tertiary-container": "#66defc",
+                        "error-dim": "#4e0309",
+                        "primary": "#005db6",
+                        "tertiary-dim": "#005b6c",
+                        "outline-variant": "#aab3b9"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-header {
+            background: rgba(248, 249, 251, 0.8);
+            backdrop-filter: blur(12px);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fb;
+            color: #2b3438;
+        }
+        h1, h2, h3 {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 w-full z-50 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm dark:shadow-none flex justify-between items-center px-8 h-16 w-full">
+<div class="flex items-center gap-8">
+<span class="text-xl font-extrabold text-blue-800 dark:text-blue-300 tracking-tighter">Clinical Editorial</span>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-blue-700 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 pb-1 font-['Manrope'] font-bold text-lg tracking-tight" href="#">Dashboard</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-blue-600 font-['Manrope'] font-bold text-lg tracking-tight transition-colors" href="#">Teaching Hours</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-blue-600 font-['Manrope'] font-bold text-lg tracking-tight transition-colors" href="#">Surveys</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-blue-600 font-['Manrope'] font-bold text-lg tracking-tight transition-colors" href="#">Reports</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined text-on-surface-variant p-2 hover:bg-slate-100/50 rounded-full transition-colors cursor-pointer" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant p-2 hover:bg-slate-100/50 rounded-full transition-colors cursor-pointer" data-icon="settings">settings</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant/20">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="Portrait of a female doctor Aisha" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwXK0boz9b3FcYeunMxt_Kmi6Xk7q4afRjUbHc-hTg4z-pDqNwfia8PK6eqNYhhmDmgQvW9cgm3BEy_3DmYSOAv_bObM8dYBGZ2QB_JExJHmL1T-79ejxyExAYPFcyW_1VznSLVN_Bdau2cBcMnxxQ8X3GyCQAgcnJoyoiBXVdwvANcP1q67y2RjVzI7NiaMaagJ6izURZGPrG0hJwEunbum8mFFMGNAVDRWT8K88F_qy-M4RZMpgUu3G_jcipMPjGHd5B3fumV4Y"/>
+</div>
+</div>
+</nav>
+<!-- Side Navigation Bar -->
+<aside class="h-screen w-64 fixed left-0 top-0 pt-20 bg-slate-100 dark:bg-slate-950 flex flex-col border-r border-slate-200/20 z-40 hidden lg:flex">
+<div class="px-8 py-4 mb-6">
+<h2 class="font-['Manrope'] font-bold text-blue-900 dark:text-blue-100 text-lg">Medical Affairs</h2>
+<p class="text-xs text-on-surface-variant opacity-70">Clinical Curator</p>
+</div>
+<div class="flex-1 flex flex-col">
+<a class="bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400 shadow-sm rounded-l-full ml-4 pl-4 py-3 flex items-center gap-3 font-['Inter'] text-sm font-medium transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Overview</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 px-8 py-3 flex items-center gap-3 font-['Inter'] text-sm font-medium hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span>My Teaching</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 px-8 py-3 flex items-center gap-3 font-['Inter'] text-sm font-medium hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="poll">poll</span>
+<span>Survey Analytics</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 px-8 py-3 flex items-center gap-3 font-['Inter'] text-sm font-medium hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>User Management</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 px-8 py-3 flex items-center gap-3 font-['Inter'] text-sm font-medium hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>System Logs</span>
+</a>
+</div>
+<div class="p-6 mb-4">
+<button class="w-full bg-gradient-to-br from-primary to-primary-dim text-white py-3 rounded-md font-semibold text-sm shadow-sm hover:shadow-md transition-all active:scale-95">
+                Log Teaching Hours
+            </button>
+</div>
+<div class="border-t border-slate-200/20 pt-4 pb-8">
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 px-8 py-2 flex items-center gap-3 font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span>Help Center</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 px-8 py-2 flex items-center gap-3 font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 pt-24 px-8 pb-12">
+<!-- Header Section -->
+<header class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<span class="text-tertiary font-semibold text-xs tracking-widest uppercase mb-2 block">Clinician Portal</span>
+<h1 class="text-3xl font-extrabold tracking-tight text-on-surface">Welcome back, Dr. Aisha</h1>
+<p class="text-on-surface-variant mt-1">Review your teaching impact and log new clinical hours.</p>
+</div>
+<div class="flex gap-3">
+<div class="bg-surface-container-low px-4 py-2 rounded-xl flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="calendar_today">calendar_today</span>
+<span class="text-sm font-medium">October 2023</span>
+</div>
+</div>
+</header>
+<!-- Asymmetric Hero Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+<!-- Left Side: Teaching Hours & Progress (60% equivalent) -->
+<div class="lg:col-span-3 space-y-8">
+<!-- Hours Summary Card -->
+<section class="bg-surface-container-lowest rounded-xl p-8 shadow-sm border border-slate-100/50">
+<div class="flex justify-between items-start mb-8">
+<div>
+<h3 class="text-lg font-bold text-on-surface">Monthly Teaching Progress</h3>
+<p class="text-sm text-on-surface-variant">Target: 40 Hours per Cycle</p>
+</div>
+<div class="text-right">
+<span class="text-3xl font-extrabold text-primary">32.5</span>
+<span class="text-sm font-bold text-on-surface-variant">/ 40 hrs</span>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-surface-container-highest h-3 rounded-full overflow-hidden mb-8">
+<div class="bg-gradient-to-r from-primary to-tertiary h-full rounded-full w-[81%]"></div>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<div class="bg-surface-container-low p-5 rounded-xl transition-all hover:bg-surface-container-high">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-primary-dim" data-icon="event_available">event_available</span>
+<span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Scheduled</span>
+</div>
+<div class="text-2xl font-bold">24.0 <span class="text-sm font-normal text-on-surface-variant">hrs</span></div>
+</div>
+<div class="bg-surface-container-low p-5 rounded-xl transition-all hover:bg-surface-container-high">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-tertiary" data-icon="bolt">bolt</span>
+<span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Ad Hoc</span>
+</div>
+<div class="text-2xl font-bold">8.5 <span class="text-sm font-normal text-on-surface-variant">hrs</span></div>
+</div>
+</div>
+</section>
+<!-- Quick Log Form -->
+<section class="bg-surface-container-lowest rounded-xl p-8 shadow-sm border border-slate-100/50">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary" data-icon="add_circle">add_circle</span>
+<h3 class="text-lg font-bold text-on-surface">Quick Log Session</h3>
+</div>
+<form class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase ml-1">Session Date</label>
+<input class="w-full bg-surface-container-highest border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all" type="date"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase ml-1">Duration (Hours)</label>
+<input class="w-full bg-surface-container-highest border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all" placeholder="e.g. 1.5" step="0.5" type="number"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase ml-1">Students Present</label>
+<input class="w-full bg-surface-container-highest border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all" placeholder="e.g. Y3 Med Group B" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase ml-1">Session Type</label>
+<select class="w-full bg-surface-container-highest border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all">
+<option>Clinical Supervision</option>
+<option>Bedside Teaching</option>
+<option>Case Presentation</option>
+<option>Simulation Lab</option>
+</select>
+</div>
+<div class="md:col-span-2 pt-4">
+<button class="w-full bg-gradient-to-r from-primary to-primary-dim text-white py-4 rounded-xl font-bold tracking-tight shadow-md hover:shadow-lg transition-all active:scale-[0.98]" type="submit">
+                                Submit Activity for Approval
+                            </button>
+</div>
+</form>
+</section>
+</div>
+<!-- Right Side: Feedback & Tracking (40% equivalent) -->
+<div class="lg:col-span-2 space-y-8">
+<!-- Feedback Summaries (Batched) -->
+<section class="bg-surface-container-low rounded-xl p-6 border border-slate-200/20">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-sm font-bold uppercase tracking-wider text-on-surface-variant">Recent Feedback</h3>
+<span class="bg-tertiary-container text-on-tertiary-container text-[10px] px-2 py-0.5 rounded-full font-bold">BATCHED</span>
+</div>
+<div class="space-y-4">
+<!-- Feedback Item 1 -->
+<div class="bg-surface-container-lowest p-4 rounded-lg shadow-sm">
+<div class="flex justify-between mb-2">
+<span class="text-xs font-bold text-primary">Cardiology Seminar</span>
+<span class="text-[10px] text-on-surface-variant">2 days ago</span>
+</div>
+<p class="text-sm italic text-on-surface mb-3">"Dr. Aisha's explanation of ECG rhythms was the clearest we've had this term."</p>
+<div class="flex gap-1 text-tertiary">
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<!-- Feedback Item 2 -->
+<div class="bg-surface-container-lowest p-4 rounded-lg shadow-sm">
+<div class="flex justify-between mb-2">
+<span class="text-xs font-bold text-primary">Bedside Round (ICU)</span>
+<span class="text-[10px] text-on-surface-variant">5 days ago</span>
+</div>
+<p class="text-sm italic text-on-surface mb-3">"Very helpful bedside manner demonstration. Appreciated the chance to lead."</p>
+<div class="flex gap-1 text-tertiary">
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 0;">star</span>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 text-primary text-xs font-bold py-2 hover:underline">View All Feedback Reports</button>
+</section>
+<!-- Approval Status Tracker -->
+<section class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-slate-100/50">
+<h3 class="text-sm font-bold uppercase tracking-wider text-on-surface-variant mb-6">Approval Pipeline</h3>
+<div class="space-y-6">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="pending">pending</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<span class="text-sm font-bold">Journal Club</span>
+<span class="text-[10px] font-bold text-secondary bg-surface-container-high px-2 py-0.5 rounded">PENDING</span>
+</div>
+<p class="text-[11px] text-on-surface-variant">Submitted Oct 24 • 1.0 hr</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-tertiary-container/30 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<span class="text-sm font-bold">Surgical Simulation</span>
+<span class="text-[10px] font-bold text-tertiary-dim bg-tertiary-container/20 px-2 py-0.5 rounded">APPROVED</span>
+</div>
+<p class="text-[11px] text-on-surface-variant">Verified Oct 22 • 3.5 hrs</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-tertiary-container/30 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<span class="text-sm font-bold">OPD Supervision</span>
+<span class="text-[10px] font-bold text-tertiary-dim bg-tertiary-container/20 px-2 py-0.5 rounded">APPROVED</span>
+</div>
+<p class="text-[11px] text-on-surface-variant">Verified Oct 20 • 4.0 hrs</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Medical Insight / Pro-Tip (Tertiary Color Usage) -->
+<div class="bg-tertiary/10 border-l-4 border-tertiary p-5 rounded-r-xl">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-tertiary text-sm" data-icon="lightbulb">lightbulb</span>
+<span class="text-xs font-bold text-tertiary uppercase">Educational Insight</span>
+</div>
+<p class="text-xs text-on-tertiary-container leading-relaxed">
+                        Clinicians who log activities within 24 hours of completion report 40% higher accuracy in student evaluation metrics.
+                    </p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Mobile only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-slate-50/80 backdrop-blur-xl flex justify-around items-center h-16 px-4 z-50">
+<button class="flex flex-col items-center gap-1 text-blue-700">
+<span class="material-symbols-outlined" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-[10px] font-bold">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="text-[10px] font-bold">Log</span>
+</button>
+<button class="bg-primary text-white w-12 h-12 rounded-full -mt-8 shadow-lg flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined" data-icon="poll">poll</span>
+<span class="text-[10px] font-bold">Feedback</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span class="text-[10px] font-bold">Profile</span>
+</button>
+</nav>
+</body></html>

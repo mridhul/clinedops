@@ -1,0 +1,120 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: ClinEdOps
+      - generic [ref=e7]:
+        - link "Dashboard" [ref=e8] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Teaching Hours" [ref=e9] [cursor=pointer]:
+          - /url: "#"
+        - link "Surveys" [ref=e10] [cursor=pointer]:
+          - /url: "#"
+        - link "Reports" [ref=e11] [cursor=pointer]:
+          - /url: "#"
+    - generic [ref=e12]:
+      - img [ref=e14] [cursor=pointer]
+      - img [ref=e18] [cursor=pointer]
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - paragraph [ref=e23]: Superadmin
+          - paragraph [ref=e24]: super_admin
+        - generic "Click to Sign Out" [ref=e25] [cursor=pointer]:
+          - generic [ref=e26]: S
+  - complementary [ref=e27]:
+    - generic [ref=e28]:
+      - heading "Medical Affairs" [level=2] [ref=e29]
+      - paragraph [ref=e30]: Clinical Curator
+    - generic [ref=e31]:
+      - link "Overview" [ref=e32] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e33]
+        - generic [ref=e38]: Overview
+      - link "Survey Analytics" [ref=e39] [cursor=pointer]:
+        - /url: /dashboard/surveys/analytics
+        - img [ref=e40]
+        - generic [ref=e42]: Survey Analytics
+      - link "Templates" [ref=e43] [cursor=pointer]:
+        - /url: /dashboard/surveys/templates
+        - img [ref=e44]
+        - generic [ref=e49]: Templates
+      - link "User Management" [ref=e50] [cursor=pointer]:
+        - /url: /dashboard/students
+        - img [ref=e51]
+        - generic [ref=e56]: User Management
+      - link "Admin Console" [ref=e57] [cursor=pointer]:
+        - /url: /dashboard/admin
+        - img [ref=e58]
+        - generic [ref=e60]: Admin Console
+    - generic [ref=e62]:
+      - link "Help Center" [ref=e63] [cursor=pointer]:
+        - /url: "#"
+        - img [ref=e64]
+        - generic [ref=e67]: Help Center
+      - button "Sign Out" [ref=e68] [cursor=pointer]:
+        - img [ref=e69]
+        - generic [ref=e72]: Sign Out
+  - main [ref=e73]:
+    - generic [ref=e75]:
+      - generic [ref=e76]:
+        - generic [ref=e77]:
+          - generic [ref=e78]: Clinician Portal
+          - heading "Welcome back, Dr. Aisha" [level=1] [ref=e79]
+          - paragraph [ref=e80]: Review your teaching impact and log new clinical hours.
+        - generic [ref=e82]:
+          - img [ref=e83]
+          - generic [ref=e85]: October 2023
+      - generic [ref=e86]:
+        - generic [ref=e87]:
+          - generic [ref=e88]:
+            - generic [ref=e90]:
+              - generic [ref=e91]:
+                - generic [ref=e92]: Monthly Teaching Progress
+                - paragraph [ref=e93]: "Target: 40 Hours per Cycle"
+              - generic [ref=e94]: 32.5/ 40 hrs
+            - generic [ref=e99]:
+              - img [ref=e100]
+              - generic [ref=e103]: You're on track to hit your goal this week!
+          - generic [ref=e104]:
+            - generic [ref=e105]:
+              - heading "Pending Approvals" [level=3] [ref=e106]
+              - button "View All" [ref=e107]
+            - generic [ref=e109]:
+              - generic [ref=e110]:
+                - img [ref=e112]
+                - generic [ref=e115]:
+                  - heading "Gastroenterology Seminar" [level=4] [ref=e116]
+                  - paragraph [ref=e117]: Oct 12, 2023 • 2.5 Hours
+              - generic [ref=e118]: Reviewing
+            - generic [ref=e120]:
+              - generic [ref=e121]:
+                - img [ref=e123]
+                - generic [ref=e126]:
+                  - heading "Gastroenterology Seminar" [level=4] [ref=e127]
+                  - paragraph [ref=e128]: Oct 12, 2023 • 2.5 Hours
+              - generic [ref=e129]: Reviewing
+        - generic [ref=e130]:
+          - generic [ref=e131]:
+            - generic [ref=e133]: Quick Insights
+            - generic [ref=e134]:
+              - generic [ref=e135]:
+                - img [ref=e137]
+                - generic [ref=e140]:
+                  - heading "Attendance Verified" [level=5] [ref=e141]
+                  - paragraph [ref=e142]: 92% of your students confirmed their attendance this month.
+              - generic [ref=e143]:
+                - img [ref=e145]
+                - generic [ref=e147]:
+                  - heading "Action Required" [level=5] [ref=e148]
+                  - paragraph [ref=e149]: 3 sessions from last cycle are still in draft state.
+          - generic [ref=e150] [cursor=pointer]:
+            - generic [ref=e151]:
+              - heading "Teaching Feedback" [level=4] [ref=e152]
+              - generic [ref=e153]:
+                - generic [ref=e154]: "4.9"
+                - generic [ref=e155]: / 5.0
+              - paragraph [ref=e156]: Your satisfaction rate is in the top 5% of the Medicine Department.
+            - img [ref=e158]
+```

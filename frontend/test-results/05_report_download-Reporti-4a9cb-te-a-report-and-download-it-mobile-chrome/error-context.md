@@ -1,0 +1,94 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e6]: ClinEdOps
+    - generic [ref=e7]:
+      - img [ref=e9] [cursor=pointer]
+      - img [ref=e13] [cursor=pointer]
+      - generic "Click to Sign Out" [ref=e17] [cursor=pointer]:
+        - generic [ref=e18]: S
+  - navigation [ref=e19]:
+    - link "Overview" [ref=e20] [cursor=pointer]:
+      - /url: /dashboard
+      - img [ref=e21]
+      - generic [ref=e26]: Overview
+    - link "Survey Analytics" [ref=e27] [cursor=pointer]:
+      - /url: /dashboard/surveys/analytics
+      - img [ref=e28]
+      - generic [ref=e30]: Survey Analytics
+    - link "Templates" [ref=e31] [cursor=pointer]:
+      - /url: /dashboard/surveys/templates
+      - img [ref=e32]
+      - generic [ref=e37]: Templates
+    - link "User Management" [ref=e38] [cursor=pointer]:
+      - /url: /dashboard/students
+      - img [ref=e39]
+      - generic [ref=e44]: User Management
+    - link "Admin Console" [ref=e45] [cursor=pointer]:
+      - /url: /dashboard/admin
+      - img [ref=e46]
+      - generic [ref=e48]: Admin Console
+  - main [ref=e49]:
+    - generic [ref=e51]:
+      - generic [ref=e52]:
+        - generic [ref=e53]:
+          - generic [ref=e54]: Clinician Portal
+          - heading "Welcome back, Dr. Aisha" [level=1] [ref=e55]
+          - paragraph [ref=e56]: Review your teaching impact and log new clinical hours.
+        - generic [ref=e58]:
+          - img [ref=e59]
+          - generic [ref=e61]: October 2023
+      - generic [ref=e62]:
+        - generic [ref=e63]:
+          - generic [ref=e64]:
+            - generic [ref=e66]:
+              - generic [ref=e67]:
+                - generic [ref=e68]: Monthly Teaching Progress
+                - paragraph [ref=e69]: "Target: 40 Hours per Cycle"
+              - generic [ref=e70]: 32.5/ 40 hrs
+            - generic [ref=e75]:
+              - img [ref=e76]
+              - generic [ref=e79]: You're on track to hit your goal this week!
+          - generic [ref=e80]:
+            - generic [ref=e81]:
+              - heading "Pending Approvals" [level=3] [ref=e82]
+              - button "View All" [ref=e83]
+            - generic [ref=e85]:
+              - generic [ref=e86]:
+                - img [ref=e88]
+                - generic [ref=e91]:
+                  - heading "Gastroenterology Seminar" [level=4] [ref=e92]
+                  - paragraph [ref=e93]: Oct 12, 2023 • 2.5 Hours
+              - generic [ref=e94]: Reviewing
+            - generic [ref=e96]:
+              - generic [ref=e97]:
+                - img [ref=e99]
+                - generic [ref=e102]:
+                  - heading "Gastroenterology Seminar" [level=4] [ref=e103]
+                  - paragraph [ref=e104]: Oct 12, 2023 • 2.5 Hours
+              - generic [ref=e105]: Reviewing
+        - generic [ref=e106]:
+          - generic [ref=e107]:
+            - generic [ref=e109]: Quick Insights
+            - generic [ref=e110]:
+              - generic [ref=e111]:
+                - img [ref=e113]
+                - generic [ref=e116]:
+                  - heading "Attendance Verified" [level=5] [ref=e117]
+                  - paragraph [ref=e118]: 92% of your students confirmed their attendance this month.
+              - generic [ref=e119]:
+                - img [ref=e121]
+                - generic [ref=e123]:
+                  - heading "Action Required" [level=5] [ref=e124]
+                  - paragraph [ref=e125]: 3 sessions from last cycle are still in draft state.
+          - generic [ref=e126] [cursor=pointer]:
+            - generic [ref=e127]:
+              - heading "Teaching Feedback" [level=4] [ref=e128]
+              - generic [ref=e129]:
+                - generic [ref=e130]: "4.9"
+                - generic [ref=e131]: / 5.0
+              - paragraph [ref=e132]: Your satisfaction rate is in the top 5% of the Medicine Department.
+            - img [ref=e134]
+```

@@ -66,7 +66,7 @@ async def logout(
     request: Request,
     response: Response,
     session: AsyncSession = Depends(get_db_session),
-    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_optional),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_optional),
 ) -> Envelope[dict]:
     # Logout is idempotent: clear cookie even if token is missing/invalid.
     response.delete_cookie("refresh_token")

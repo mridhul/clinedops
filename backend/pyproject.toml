@@ -17,6 +17,11 @@ dependencies = [
   "fastapi-users[sqlalchemy,oauth2,jwt]>=14.0.0",
   "celery>=5.3",
   "redis>=5.0",
+  "openpyxl>=3.1",
+  "python-multipart>=0.0.9",
+  "reportlab>=4.1.0",
+  "boto3>=1.34",
+  "psycopg2-binary>=2.9",
 ]
 
 [project.optional-dependencies]
@@ -26,6 +31,7 @@ dev = [
   "httpx>=0.27",
   "ruff>=0.6",
   "mypy>=1.10",
+  "faker>=24.0",
 ]
 
 [build-system]
