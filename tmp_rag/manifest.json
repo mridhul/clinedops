@@ -1,0 +1,6 @@
+{
+  "embed_model": "BAAI/bge-small-en-v1.5",
+  "embedding_dim": 384,
+  "num_chunks": 130,
+  "docs_root": "C:\\SlashLLM\\clinedops\\DOCS"
+}

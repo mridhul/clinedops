@@ -3,9 +3,13 @@ alembic/env.py
 alembic/versions/0001_initial.py
 alembic/versions/0002_spec1_lifecycle.py
 alembic/versions/0003_spec2_teaching_hours.py
+alembic/versions/2b3eaa4f0e1c_backfill_report_template_types.py
 alembic/versions/2dd1c1b262e0_add_system_settings_and_role_permission.py
+alembic/versions/5099a0b58e51_add_profile_fields_to_users.py
 alembic/versions/572a362476aa_extend_surveys_spec_3.py
 alembic/versions/5bb47d1fd1c1_add_reporting_spec_4.py
+alembic/versions/70f6fae95c49_add_shadowing_spec_6.py
+alembic/versions/9c2b6e0c1a3f_seed_default_report_templates.py
 alembic/versions/a24f9846ac7e_add_notifications_spec_5.py
 alembic/versions/b8706927c988_add_performance_indexes.py
 app/__init__.py
@@ -20,6 +24,8 @@ app/api/v1/academic_cycles/router.py
 app/api/v1/academic_cycles/schemas.py
 app/api/v1/admin/router.py
 app/api/v1/admin/schemas.py
+app/api/v1/ai_help/router.py
+app/api/v1/ai_help/schemas.py
 app/api/v1/analytics/__init__.py
 app/api/v1/analytics/router.py
 app/api/v1/analytics/schemas.py
@@ -36,6 +42,8 @@ app/api/v1/reports/__init__.py
 app/api/v1/reports/router.py
 app/api/v1/reports/schemas.py
 app/api/v1/settings/router.py
+app/api/v1/shadowing/router.py
+app/api/v1/shadowing/schemas.py
 app/api/v1/students/router.py
 app/api/v1/students/schemas.py
 app/api/v1/surveys/router.py
@@ -57,11 +65,13 @@ app/db/session.py
 app/db/models/__init__.py
 app/db/models/core.py
 app/db/models/enums.py
+app/db/models/shadowing.py
 app/db/models/user.py
 app/schemas/__init__.py
 app/schemas/envelope.py
 app/schemas/surveys.py
 app/scripts/__init__.py
+app/scripts/build_rag_index.py
 app/scripts/seed.py
 app/scripts/seed_demo_data.py
 app/scripts/seed_reports.py
@@ -82,6 +92,9 @@ app/services/student_service.py
 app/services/survey_service.py
 app/services/teaching_hours_service.py
 app/services/tutor_service.py
+app/services/rag/__init__.py
+app/services/rag/constants.py
+app/services/rag/service.py
 app/tasks/notifications.py
 app/tasks/reports.py
 app/tasks/surveys.py
@@ -94,6 +107,7 @@ tests/conftest.py
 tests/test_auth.py
 tests/test_migration_tables.py
 tests/test_performance.py
+tests/test_rbac_matrix.py
 tests/test_spec1_lifecycle.py
 tests/test_spec2_teaching_hours.py
 tests/api/v1/test_admin.py

@@ -1,0 +1,4 @@
+# Local secrets — never commit
+backend/.env
+.env
+*.env.local

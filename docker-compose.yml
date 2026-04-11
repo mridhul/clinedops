@@ -1,3 +1,10 @@
+x-backend-image-build: &backend_image_build
+  context: .
+  dockerfile: backend/Dockerfile
+  args:
+    # Relative to repo root (e.g. RAG or mykb). Copied into the image as /RAG at build time.
+    RAG_DOCS_BUILD_PATH: ${RAG_DOCS_BUILD_PATH:-RAG}
+
 services:
   db:
     image: postgres:16
@@ -17,7 +24,11 @@ services:
 
   backend:
     build:
-      context: ./backend
+      <<: *backend_image_build
+    # Loads GROQ_API_KEY, GROQ_MODEL, etc. Values below override .env for Docker-specific URLs.
+    env_file:
+      - path: ./backend/.env
+        required: false
     environment:
       DATABASE_URL: postgresql+asyncpg://clinedops:clinedops_password@db:5432/clinedops
       REDIS_URL: redis://redis:6379/0
@@ -34,6 +45,10 @@ services:
       # If these keys are not provided, the container generates ephemeral dev keys at startup.
       JWT_PRIVATE_KEY: ""
       JWT_PUBLIC_KEY: ""
+      # After migrations, seed DEMO.md personas once (superadmin@nuhs.edu.sg absent). Set to 0 to skip.
+      AUTO_SEED_DEMO: "1"
+      RAG_INDEX_PATH: /rag_data
+      RAG_DOCS_PATH: /RAG
     depends_on:
       - db
       - redis
@@ -41,11 +56,12 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - rag_data:/rag_data
       - reports_data:/data/reports
 
   celery:
     build:
-      context: ./backend
+      <<: *backend_image_build
     command: celery -A app.celery_app worker --loglevel=info
     environment:
       DATABASE_URL: postgresql+asyncpg://clinedops:clinedops_password@db:5432/clinedops
@@ -90,4 +106,5 @@ services:
 volumes:
   db_data:
   reports_data:
+  rag_data:
 
