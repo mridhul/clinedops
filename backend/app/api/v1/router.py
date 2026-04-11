@@ -18,6 +18,7 @@ from app.api.v1.analytics.router import router as analytics_router
 from app.api.v1.reports.router import router as reports_router
 from app.api.v1.notifications.router import router as notifications_router
 from app.api.v1.settings.router import router as settings_router
+from app.api.v1.ai_help.router import router as ai_help_router
 
 api_router = APIRouter()
 api_router.include_router(health_router)
@@ -34,6 +35,7 @@ api_router.include_router(analytics_router, prefix="/analytics", tags=["analytic
 api_router.include_router(reports_router, prefix="/reports", tags=["reports"])
 api_router.include_router(notifications_router, prefix="/notifications", tags=["notifications"])
 api_router.include_router(settings_router, prefix="/settings", tags=["settings"])
+api_router.include_router(ai_help_router, prefix="/ai-help", tags=["ai_help"])
 api_router.include_router(shadowing_router, prefix="/shadowing", tags=["shadowing"])
 
 

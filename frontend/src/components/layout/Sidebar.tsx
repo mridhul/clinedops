@@ -4,12 +4,12 @@ import {
   History, 
   BarChart3, 
   Users, 
-  HelpCircle, 
   LogOut,
   Plus,
   Shield,
   Bell,
   Megaphone,
+  MessageSquareText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -37,6 +37,7 @@ const Sidebar: React.FC = () => {
   const navItems = [
     { icon: LayoutDashboard, label: 'Overview', href: '/dashboard', show: true },
     { icon: Bell, label: 'Notifications', href: '/dashboard/notifications', show: true },
+    { icon: MessageSquareText, label: 'AI Help', href: '/dashboard/ai-help', show: true },
     { 
       icon: History, 
       label: isStudent ? 'My Sessions' : 'Teaching Sessions', 
@@ -106,10 +107,6 @@ const Sidebar: React.FC = () => {
         </div>
 
         <div className="pt-6 pb-12 mt-2 shadow-[0_-12px_32px_-28px_rgba(43,52,56,0.12)]">
-          <a href="#" className="text-muted-foreground hover:text-foreground px-8 py-2.5 flex items-center gap-3 font-inter text-sm font-medium transition-colors">
-            <HelpCircle size={18} />
-            <span>Help Center</span>
-          </a>
           <button 
             onClick={handleSignOut}
             className="w-full text-muted-foreground hover:text-destructive px-8 py-2.5 flex items-center gap-3 font-inter text-sm font-medium transition-colors cursor-pointer"

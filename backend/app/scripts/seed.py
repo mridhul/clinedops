@@ -3,6 +3,7 @@ ClinEdOps Demo Seed Script
 Run: docker compose exec backend python -m app.scripts.seed
 
 Idempotent: pass --reset flag to wipe seeded data and re-seed.
+Pass --if-empty to skip when superadmin@nuhs.edu.sg already exists (Docker entrypoint uses this).
 Uses random.seed(42) for reproducible data.
 """
 from __future__ import annotations
@@ -118,7 +119,9 @@ def seed_users(session) -> dict[str, list]:
         "student": [],
     }
 
-    def insert_user(email: str, full_name: str, role: str, discipline: Optional[str] = None, is_superuser: bool = False) -> dict:
+    def insert_user(
+        email: str, full_name: str, role: str, discipline: str | None = None, is_superuser: bool = False
+    ) -> dict:
         uid = uuid.uuid4()
         session.execute(
             text("""
@@ -137,29 +140,35 @@ def seed_users(session) -> dict[str, list]:
     u = insert_user("superadmin@nuhs.edu.sg", "Dr. Super Admin", "super_admin", is_superuser=True)
     users["super_admin"].append(u)
 
-    # Programme admins — one per discipline
+    # Programme admins — one per discipline (DEMO.md: admin.medicine@nuhs.edu.sg)
     for disc in DISCIPLINES:
-        name = f"Admin {disc.replace('_', ' ').title()}"
+        if disc == "medicine":
+            name = "Program Admin (Medicine)"
+        else:
+            name = f"Admin {disc.replace('_', ' ').title()}"
         u = insert_user(f"admin.{disc}@nuhs.edu.sg", name, "programme_admin", discipline=disc)
         users["programme_admin"].append(u)
 
-    # Supervisors — one per discipline
+    # Supervisors — one per discipline (DEMO.md: supervisor.nursing@nuhs.edu.sg)
     for disc in DISCIPLINES:
-        name = rng_name()
+        _ = rng_name()  # keep RNG stream aligned with historical seed runs
+        name = "Priya Kumar" if disc == "nursing" else _
         u = insert_user(f"supervisor.{disc}@nuhs.edu.sg", f"Dr. {name}", "supervisor", discipline=disc)
         users["supervisor"].append(u)
 
-    # Tutors — 20 total, 5 per discipline
+    # Tutors — 20 total, 5 per discipline (DEMO.md: tutor.medicine.0@nuhs.edu.sg)
     for disc in DISCIPLINES:
         for i in range(5):
-            name = rng_name()
+            _ = rng_name()
+            name = "Wei Ming Koh" if disc == "medicine" and i == 0 else _
             u = insert_user(f"tutor.{disc}.{i}@nuhs.edu.sg", f"Dr. {name}", "tutor", discipline=disc)
             users["tutor"].append(u)
 
-    # Students — 50 total (~12-13 per discipline)
+    # Students — 50 total (~12-13 per discipline) (DEMO.md: student.0@nus.edu.sg)
     for i in range(50):
         disc = DISCIPLINES[i % 4]
-        name = rng_name()
+        _ = rng_name()
+        name = "Alex Ng" if i == 0 else _
         u = insert_user(f"student.{i}@nus.edu.sg", name, "student", discipline=disc)
         users["student"].append(u)
 
@@ -711,6 +720,17 @@ def seed_import_batches(session, admin_id) -> None:
 # Main
 # ---------------------------------------------------------------------------
 
+def is_demo_seeded(session) -> bool:
+    """True if demo super admin from DEMO.md already exists."""
+    from sqlalchemy import text
+
+    row = session.execute(
+        text("SELECT 1 FROM users WHERE email = :e LIMIT 1"),
+        {"e": "superadmin@nuhs.edu.sg"},
+    ).fetchone()
+    return row is not None
+
+
 def run_seed(reset: bool = False) -> None:
     import time
     global SEED_PASSWORD
@@ -783,5 +803,21 @@ def run_seed(reset: bool = False) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="ClinEdOps demo seed script")
     parser.add_argument("--reset", action="store_true", help="Truncate seeded data before re-seeding")
+    parser.add_argument(
+        "--if-empty",
+        action="store_true",
+        help="Skip unless demo superadmin is absent (safe for container startup; use with --reset to always re-seed)",
+    )
     args = parser.parse_args()
+
+    if args.if_empty and not args.reset:
+        engine = get_engine()
+        check_session = get_session(engine)
+        try:
+            if is_demo_seeded(check_session):
+                print("Demo data already present (superadmin@nuhs.edu.sg); skipping seed.")
+                sys.exit(0)
+        finally:
+            check_session.close()
+
     run_seed(reset=args.reset)

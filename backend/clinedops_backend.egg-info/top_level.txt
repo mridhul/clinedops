@@ -1,4 +1,6 @@
 alembic
 app
+build
 docker
 tests
+uploads

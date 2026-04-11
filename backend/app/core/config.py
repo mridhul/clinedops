@@ -1,13 +1,21 @@
 from __future__ import annotations
 
-from functools import lru_cache
-
+from pathlib import Path
 from typing import Optional
+
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# backend/.env — stable path whether cwd is backend/ or /app (Docker).
+_BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=str(_BACKEND_ROOT / ".env"),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     database_url: str
     redis_url: str = "redis://redis:6379/0"
@@ -33,9 +41,27 @@ class Settings(BaseSettings):
     s3_bucket: Optional[str] = None
     ses_sender_email: str = "notifications@clinedops.com"
 
+    # AI Help (RAG + Groq)
+    groq_api_key: Optional[str] = None
+    groq_model: str = "llama-3.3-70b-versatile"
+    # Source documents (.md/.pdf) for index builds; see app.scripts.build_rag_index (env RAG_DOCS_PATH).
+    rag_docs_path: str = "/DOCS"
+    rag_index_path: str = "/rag_data"
+    rag_retrieval_k: int = 4
+
+    @field_validator("groq_api_key", mode="before")
+    @classmethod
+    def empty_groq_key_to_none(cls, v: object) -> object:
+        if isinstance(v, str):
+            v = v.strip()
+        if v == "":
+            return None
+        return v
+
 Settings.model_rebuild()
 
-@lru_cache(maxsize=1)
+
 def get_settings() -> Settings:
+    # No LRU cache: env (e.g. GROQ_API_KEY) must re-read after .env / container updates without a stale snapshot.
     return Settings()
 

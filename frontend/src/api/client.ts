@@ -41,14 +41,28 @@ export function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promis
     signal: options.signal,
   })
     .then(async (res) => {
-      const json: Envelope<T> = await res.json().catch(() => null)
-      if (!res.ok) {
-        throw new Error(messageFromErrorBody(json, `Request failed: ${res.status}`))
+      const text = await res.text()
+      let json: unknown = null
+      if (text) {
+        try {
+          json = JSON.parse(text) as Envelope<T>
+        } catch {
+          /* non-JSON body (e.g. proxy HTML) */
+        }
       }
-      if (json?.errors?.length) {
+      if (!res.ok) {
+        const fallback =
+          text.trim().slice(0, 400) || `Request failed (${res.status} ${res.statusText || ''})`.trim()
+        throw new Error(messageFromErrorBody(json, fallback))
+      }
+      if (!json || typeof json !== 'object') {
+        throw new Error('Invalid response from server')
+      }
+      const env = json as Envelope<T>
+      if (env.errors?.length) {
         throw new Error(messageFromErrorBody(json, 'Request failed'))
       }
-      return json?.data as T
+      return env.data as T
     })
 }
 
