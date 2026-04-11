@@ -9,7 +9,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from fastapi.responses import StreamingResponse
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.teaching_hours.schemas import (
@@ -30,6 +30,7 @@ from app.db.models import (
     Department,
     Posting,
     SessionStudent,
+    Student,
     TeachingSession,
     Tutor,
     TutorBillableRate,
@@ -57,6 +58,50 @@ def _fmt_d(d: Optional[date]) -> Optional[str]:
     return d.isoformat() if d else None
 
 
+# Student.id -> (full_name, email, student_code)
+StudentDisplayMap = dict[UUID, tuple[Optional[str], Optional[str], Optional[str]]]
+
+
+async def _session_display_maps(
+    db: AsyncSession,
+    sessions: list[TeachingSession],
+) -> tuple[dict[UUID, tuple[Optional[str], Optional[str]]], StudentDisplayMap]:
+    """Batch-load tutor (name, code) and student profile fields for session list/detail."""
+    tutor_display: dict[UUID, tuple[Optional[str], Optional[str]]] = {}
+    student_display: StudentDisplayMap = {}
+    if not sessions:
+        return tutor_display, student_display
+
+    tutor_ids: set[UUID] = set()
+    student_ids: set[UUID] = set()
+    for ts in sessions:
+        tutor_ids.add(ts.tutor_id)
+        for ss in ts.session_students or []:
+            if ss.is_active:
+                student_ids.add(ss.student_id)
+
+    if tutor_ids:
+        res = await db.execute(
+            select(Tutor, User).join(User, Tutor.user_id == User.id).where(Tutor.id.in_(tutor_ids))
+        )
+        for t, u in res.all():
+            tutor_display[t.id] = (u.full_name, t.tutor_code)
+
+    if student_ids:
+        res = await db.execute(
+            select(Student, User).join(User, Student.user_id == User.id).where(Student.id.in_(student_ids))
+        )
+        for st, u in res.all():
+            student_display[st.id] = (u.full_name, u.email, st.student_code)
+
+    return tutor_display, student_display
+
+
+async def _session_out_with_displays(db: AsyncSession, ts: TeachingSession) -> SessionOut:
+    td, sd = await _session_display_maps(db, [ts])
+    return await _session_out(db, ts, tutor_display=td, student_display=sd)
+
+
 async def _get_billable_rate(session: AsyncSession, tutor_id: UUID, session_date: date) -> Optional[Decimal]:
     """Find the applicable hourly rate for a tutor on a given date."""
     stmt = (
@@ -76,20 +121,41 @@ async def _get_billable_rate(session: AsyncSession, tutor_id: UUID, session_date
     return tbr.rate_per_hour if tbr else None
 
 
-async def _session_out(session: AsyncSession, ts: TeachingSession) -> SessionOut:
+async def _session_out(
+    session: AsyncSession,
+    ts: TeachingSession,
+    *,
+    tutor_display: Optional[dict[UUID, tuple[Optional[str], Optional[str]]]] = None,
+    student_display: Optional[StudentDisplayMap] = None,
+) -> SessionOut:
     """Convert a TeachingSession ORM object to SessionOut schema."""
     flags_raw: list[dict[str, Any]] = ts.anomaly_flags or []
     flags = [AnomalyFlagOut(type=f["type"], detail=f["detail"]) for f in flags_raw]
 
-    students_out = [
-        SessionStudentOut(
-            id=ss.id,
-            student_id=ss.student_id,
-            attendance_confirmed_at=_fmt_dt(ss.attendance_confirmed_at),
+    students_out: list[SessionStudentOut] = []
+    for ss in ts.session_students or []:
+        if not ss.is_active:
+            continue
+        sname: Optional[str] = None
+        semail: Optional[str] = None
+        scode: Optional[str] = None
+        if student_display and ss.student_id in student_display:
+            sname, semail, scode = student_display[ss.student_id]
+        students_out.append(
+            SessionStudentOut(
+                id=ss.id,
+                student_id=ss.student_id,
+                full_name=sname,
+                email=semail,
+                student_code=scode,
+                attendance_confirmed_at=_fmt_dt(ss.attendance_confirmed_at),
+            )
         )
-        for ss in (ts.session_students or [])
-        if ss.is_active
-    ]
+
+    tutor_full_name: Optional[str] = None
+    tutor_code_str: Optional[str] = None
+    if tutor_display and ts.tutor_id in tutor_display:
+        tutor_full_name, tutor_code_str = tutor_display[ts.tutor_id]
 
     # Compute billable amount
     billable_amount: Optional[Decimal] = None
@@ -103,6 +169,8 @@ async def _session_out(session: AsyncSession, ts: TeachingSession) -> SessionOut
         id=ts.id,
         posting_id=ts.posting_id,
         tutor_id=ts.tutor_id,
+        tutor_full_name=tutor_full_name,
+        tutor_code=tutor_code_str,
         starts_at=_fmt_dt(ts.starts_at) or "",
         duration_minutes=ts.duration_minutes,
         session_type=ts.session_type,
@@ -295,7 +363,7 @@ async def create_session(
     )
     await session.commit()
     await session.refresh(ts)
-    return await _session_out(session, ts)
+    return await _session_out_with_displays(session, ts)
 
 
 async def create_bulk_sessions(
@@ -362,7 +430,7 @@ async def get_session(
         raise HTTPException(status_code=404, detail="Session not found")
 
     await _assert_session_access(session, actor=actor, ts=ts)
-    return await _session_out(session, ts)
+    return await _session_out_with_displays(session, ts)
 
 
 async def _assert_session_access(session: AsyncSession, *, actor: User, ts: TeachingSession) -> None:
@@ -404,6 +472,7 @@ async def list_sessions(
     department_id: Optional[UUID] = None,
     status_filter: Optional[str] = None,
     tutor_id: Optional[UUID] = None,
+    student_search: Optional[str] = None,
     date_from: Optional[date] = None,
     date_to: Optional[date] = None,
     limit: int = 50,
@@ -411,6 +480,7 @@ async def list_sessions(
 ) -> SessionListResponse:
     v = role_value(actor)
     scoped = discipline_scope_for_user(actor)
+    student_term = student_search.strip() if student_search and student_search.strip() else ""
 
     def _base(stmt):
         stmt = stmt.where(TeachingSession.is_active.is_(True))
@@ -431,6 +501,23 @@ async def list_sessions(
             stmt = stmt.where(TeachingSession.approval_status == status_filter)
         if tutor_id:
             stmt = stmt.where(TeachingSession.tutor_id == tutor_id)
+        if student_term:
+            like = f"%{student_term}%"
+            matching_sessions = (
+                select(SessionStudent.teaching_session_id)
+                .join(Student, SessionStudent.student_id == Student.id)
+                .join(User, Student.user_id == User.id)
+                .where(
+                    SessionStudent.is_active.is_(True),
+                    or_(
+                        User.full_name.ilike(like),
+                        User.email.ilike(like),
+                        Student.student_code.ilike(like),
+                    ),
+                )
+                .distinct()
+            )
+            stmt = stmt.where(TeachingSession.id.in_(matching_sessions))
         if date_from:
             stmt = stmt.where(func.date(TeachingSession.starts_at) >= date_from)
         if date_to:
@@ -470,7 +557,8 @@ async def list_sessions(
         )
     ).scalars().all()
 
-    items = [await _session_out(session, ts) for ts in rows]
+    td, sd = await _session_display_maps(session, list(rows))
+    items = [await _session_out(session, ts, tutor_display=td, student_display=sd) for ts in rows]
     return SessionListResponse(items=items, total=total, limit=limit, offset=offset)
 
 
@@ -549,7 +637,7 @@ async def update_session(
     )
     await session.commit()
     await session.refresh(ts)
-    return await _session_out(session, ts)
+    return await _session_out_with_displays(session, ts)
 
 
 # ── Approval workflow ─────────────────────────────────────────────────────────
@@ -595,7 +683,7 @@ async def submit_session(
     )
     await session.commit()
     await session.refresh(ts)
-    return await _session_out(session, ts)
+    return await _session_out_with_displays(session, ts)
 
 
 async def approve_session(
@@ -637,7 +725,7 @@ async def approve_session(
     )
     await session.commit()
     await session.refresh(ts)
-    return await _session_out(session, ts)
+    return await _session_out_with_displays(session, ts)
 
 
 async def reject_session(
@@ -681,7 +769,7 @@ async def reject_session(
     )
     await session.commit()
     await session.refresh(ts)
-    return await _session_out(session, ts)
+    return await _session_out_with_displays(session, ts)
 
 
 async def student_confirm_attendance(
@@ -720,7 +808,7 @@ async def student_confirm_attendance(
     ss.attendance_confirmed_at = datetime.utcnow()
     await session.commit()
     await session.refresh(ts)
-    return await _session_out(session, ts)
+    return await _session_out_with_displays(session, ts)
 
 
 # ── Dashboard ─────────────────────────────────────────────────────────────────

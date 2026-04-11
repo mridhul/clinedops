@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { ConfigProvider } from 'antd'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './auth/useAuth'
@@ -42,6 +43,15 @@ import BroadcastForm from './pages/admin/BroadcastForm'
 
 import './theme/global.css'
 import { themeConfig } from './theme/themeConfig'
+
+/** Admin API is super_admin-only; programme admins must not see broken console UX. */
+function RequireSuperAdmin({ children }: { children: ReactNode }) {
+  const profile = useAuth((s) => s.profile)
+  if (profile?.role !== 'super_admin') {
+    return <Navigate to="/dashboard" replace />
+  }
+  return children
+}
 
 function DashboardResolver() {
   const profile = useAuth((s) => s.profile)
@@ -94,7 +104,14 @@ export default function App() {
                     
                     <Route path="academic-cycles" element={<AcademicCyclesPage />} />
                     <Route path="departments" element={<DepartmentsPage />} />
-                    <Route path="admin" element={<AdminOverview />} />
+                    <Route
+                      path="admin"
+                      element={
+                        <RequireSuperAdmin>
+                          <AdminOverview />
+                        </RequireSuperAdmin>
+                      }
+                    />
                     
                     {/* Spec 2: Teaching Hours */}
                     <Route path="teaching-sessions" element={<SessionsListPage />} />
@@ -118,7 +135,14 @@ export default function App() {
                     <Route path="notifications" element={<NotificationsPage />} />
                     <Route path="settings/notifications" element={<NotificationSettingsPage />} />
                     <Route path="settings/profile" element={<ProfilePage />} />
-                    <Route path="admin/broadcast" element={<BroadcastForm />} />
+                    <Route
+                      path="admin/broadcast"
+                      element={
+                        <RequireSuperAdmin>
+                          <BroadcastForm />
+                        </RequireSuperAdmin>
+                      }
+                    />
                   </Routes>
                 </MainLayout>
               </ProtectedRoute>

@@ -19,41 +19,41 @@ const NotificationsPage: React.FC = () => {
   const getNotificationIconColor = (type: string) => {
     switch(type) {
       case 'LOW_SCORE_ALERT': return 'text-destructive';
-      case 'HOURS_APPROVED': return 'text-green-500';
+      case 'HOURS_APPROVED': return 'text-[#0a4a56]';
       case 'HOURS_REJECTED': return 'text-destructive';
-      case 'DEADLINE_APPROACHING': return 'text-amber-500';
+      case 'DEADLINE_APPROACHING': return 'text-secondary';
       default: return 'text-primary';
     }
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl space-y-6">
-      <div className="flex justify-between items-end">
+    <div className="container mx-auto p-6 max-w-4xl space-y-8">
+      <div className="flex justify-between items-end cd-section">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-primary">Notifications</h1>
-          <p className="text-muted-foreground mt-1 text-sm font-medium">Manage your clinical operations alerts.</p>
+          <h1 className="text-4xl font-manrope font-extrabold tracking-tight text-foreground">Notifications</h1>
+          <p className="text-muted-foreground mt-2 text-sm font-medium">Clinical operations alerts and announcements.</p>
         </div>
         <Button 
           variant="outline" 
           onClick={() => markAllRead.mutate()} 
           disabled={markAllRead.isPending || !notifications?.some((n: Notification) => !n.is_read)}
-          className="gap-2"
+          className="gap-2 rounded-md border-border/60"
         >
           <Check className="h-4 w-4" /> Mark all read
         </Button>
       </div>
 
-      <Card className="border-none shadow-premium glass">
-        <CardHeader className="border-b border-border/50 bg-muted/20 pb-4">
-          <div className="flex bg-muted/50 p-1 rounded-lg w-full max-w-[400px]">
+      <Card className="border-0 shadow-premium glass-card overflow-hidden">
+        <CardHeader className="bg-surface-low/60 pb-4 pt-6">
+          <div className="flex bg-surface-highest/40 p-1 rounded-md w-full max-w-[400px]">
             <button 
-              className={`flex-1 flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${filter === 'all' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`flex-1 flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:pointer-events-none disabled:opacity-50 ${filter === 'all' ? 'bg-surface-lowest text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               onClick={() => setFilter('all')}
             >
               All Notifications
             </button>
             <button 
-              className={`flex-1 flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${filter === 'unread' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`flex-1 flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:pointer-events-none disabled:opacity-50 ${filter === 'unread' ? 'bg-surface-lowest text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               onClick={() => setFilter('unread')}
             >
               Unread Only
@@ -64,11 +64,11 @@ const NotificationsPage: React.FC = () => {
           {isLoading ? (
             <div className="p-8 text-center text-muted-foreground animate-pulse">Loading notifications...</div>
           ) : notifications && notifications.length > 0 ? (
-            <div className="divide-y divide-border/50">
+            <div className="flex flex-col gap-1 p-2">
               {notifications.map((notif: Notification) => (
                 <div 
                   key={notif.id} 
-                  className={`p-5 transition-colors hover:bg-accent/50 flex gap-4 ${!notif.is_read ? 'bg-accent/20' : ''}`}
+                  className={`group rounded-md px-4 py-5 transition-colors hover:bg-surface-low flex gap-4 ${!notif.is_read ? 'bg-primary/[0.04]' : ''}`}
                 >
                   <div className={`mt-1 h-2 w-2 rounded-full shrink-0 ${!notif.is_read ? 'bg-primary' : 'bg-transparent'}`} />
                   <div className="flex-1 space-y-1">

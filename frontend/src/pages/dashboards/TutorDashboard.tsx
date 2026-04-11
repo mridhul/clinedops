@@ -6,7 +6,7 @@ import type { TutorDashboardData } from '../../api/analytics';
 import { useAuth } from '../../auth/useAuth';
 import PageState from '../../components/common/PageState';
 
-const { Title, Text } = Typography;
+const { Title, Text, Paragraph } = Typography;
 
 export default function TutorDashboard() {
   const accessToken = useAuth((s) => s.accessToken);
@@ -37,44 +37,48 @@ export default function TutorDashboard() {
       error={null}
       isEmpty={!data}
     >
-      <Title level={2}>Tutor Dashboard</Title>
-      <Row gutter={[16, 16]}>
-        {kpis.map((kpi, index) => (
-          <Col xs={24} sm={12} lg={12} key={index}>
-            <Card bordered={false} className="glass-card">
-              <Statistic
-                title={<Space>{getIcon(kpi.label)} {kpi.label}</Space>}
-                value={kpi.value}
-                valueStyle={{ color: '#0055ff' }}
-              />
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      <div className="cd-section-lg">
+        <Title level={2} className="!mb-2 font-manrope">Tutor dashboard</Title>
+        <Paragraph type="secondary" className="!mb-0 max-w-2xl text-sm">
+          Teaching hours, learner feedback trends, and assigned students.
+        </Paragraph>
+      </div>
 
-      <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
-        <Col span={24}>
-          <Card title="Feedback Trends" bordered={false} className="glass-card">
+      <Row gutter={[24, 24]}>
+        <Col xs={24} lg={14}>
+          <Row gutter={[16, 16]}>
+            {kpis.map((kpi, index) => (
+              <Col xs={24} sm={12} key={index}>
+                <Card bordered={false} className="glass-card h-full">
+                  <Statistic
+                    title={<Space className="text-muted-foreground">{getIcon(kpi.label)} {kpi.label}</Space>}
+                    value={kpi.value}
+                    valueStyle={{ color: 'var(--cd-primary)' }}
+                  />
+                </Card>
+              </Col>
+            ))}
+          </Row>
+
+          <Card title={<span className="font-manrope">My students</span>} extra={<Button type="link">View all</Button>} bordered={false} className="glass-card mt-6">
+            <Text type="secondary">View and manage your currently assigned students and their progress.</Text>
+          </Card>
+        </Col>
+
+        <Col xs={24} lg={10}>
+          <Card title={<span className="font-manrope">Feedback trends</span>} bordered={false} className="glass-card shadow-premium h-full">
             <div style={{ width: '100%', height: 300 }}>
               <ResponsiveContainer>
                 <LineChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" />
-                  <YAxis domain={[0, 5]} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(43,52,56,0.06)" />
+                  <XAxis dataKey="name" tick={{ fill: 'var(--cd-on-surface-variant)', fontSize: 12 }} />
+                  <YAxis domain={[0, 5]} tick={{ fill: 'var(--cd-on-surface-variant)', fontSize: 12 }} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="score" stroke="#0055ff" strokeWidth={3} dot={{ r: 6 }} activeDot={{ r: 8 }} />
+                  <Line type="monotone" dataKey="score" stroke="var(--cd-primary)" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </Card>
-        </Col>
-      </Row>
-      
-      <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
-        <Col span={24}>
-            <Card title="My Students" extra={<Button type="link">View All</Button>} bordered={false} className="glass-card">
-                <Text type="secondary">View and manage your currently assigned students and their progress.</Text>
-            </Card>
         </Col>
       </Row>
     </PageState>

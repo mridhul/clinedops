@@ -1,8 +1,9 @@
-import { Badge, Button, Input, Modal, Space, Table, Tabs, Tag, Typography } from 'antd'
+import { Badge, Button, Input, Modal, Select, Space, Table, Tabs, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTutorsList } from '../../api/tutors'
 import { useApproveSession, useRejectSession, useSubmitSession, useTeachingSessions } from '../../api/teachingHours'
 import type { TeachingSessionOut } from '../../types/teachingHours'
 import PageState from '../../components/common/PageState'
@@ -13,12 +14,23 @@ const { Title } = Typography
 
 export default function SessionsListPage() {
   const profile = useAuth((s) => s.profile)
+  const accessToken = useAuth((s) => s.accessToken)
   const canApprove = profile?.role === 'supervisor' || profile?.role === 'programme_admin' || profile?.role === 'super_admin'
+  const isTutor = profile?.role === 'tutor'
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('1')
-  
+  const [tutorFilterId, setTutorFilterId] = useState<string | undefined>()
+  const [studentSearch, setStudentSearch] = useState<string | undefined>()
+
+  const { data: tutorsData, isLoading: tutorsLoading } = useTutorsList(
+    canApprove ? accessToken : null,
+    { limit: 200, active_only: true },
+  )
+
   const { data, isLoading } = useTeachingSessions({
     status: activeTab === '2' ? 'submitted' : undefined,
+    tutor_id: tutorFilterId,
+    student_search: isTutor ? studentSearch : undefined,
   })
 
   const submitMutation = useSubmitSession()
@@ -39,12 +51,48 @@ export default function SessionsListPage() {
     }
   }
 
+  const tutorSelectOptions = useMemo(
+    () =>
+      (tutorsData?.items ?? []).map((t) => ({
+        value: t.id,
+        label: [t.tutor_code, t.full_name, t.email].filter(Boolean).join(' — '),
+      })),
+    [tutorsData?.items],
+  )
+
   const columns: ColumnsType<TeachingSessionOut> = [
     {
       title: 'Date',
       dataIndex: 'starts_at',
       key: 'starts_at',
       render: (val: string) => dayjs(val).format('DD MMM YYYY HH:mm'),
+    },
+    {
+      title: 'Tutor',
+      key: 'tutor',
+      render: (_: unknown, record: TeachingSessionOut) => {
+        const name = record.tutor_full_name?.trim()
+        const code = record.tutor_code?.trim()
+        if (name && code) return `${name} (${code})`
+        if (name) return name
+        if (code) return code
+        return <Typography.Text type="secondary">—</Typography.Text>
+      },
+    },
+    {
+      title: 'Students',
+      key: 'students',
+      render: (_: unknown, record: TeachingSessionOut) => {
+        const parts =
+          record.session_students?.map((s) => s.full_name?.trim() || `${s.student_id.slice(0, 8)}…`) ?? []
+        if (!parts.length) return <Typography.Text type="secondary">—</Typography.Text>
+        const text = parts.join(', ')
+        return (
+          <Typography.Text ellipsis={{ tooltip: text }} style={{ maxWidth: 240 }}>
+            {text}
+          </Typography.Text>
+        )
+      },
     },
     {
       title: 'Type',
@@ -155,9 +203,42 @@ export default function SessionsListPage() {
   return (
     <div style={{ padding: 24 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-        <Title level={2}>Teaching Sessions <span style={{fontSize: 14, color: 'gray'}}>({profile?.role})</span></Title>
+        <Title level={2} className="!font-manrope">
+          Teaching sessions{' '}
+          <span className="text-sm font-normal text-muted-foreground font-inter">({profile?.role})</span>
+        </Title>
         <Button type="primary" onClick={() => navigate('/dashboard/teaching-sessions/new')}>Log New Session</Button>
       </div>
+
+      {canApprove ? (
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <Typography.Text className="text-muted-foreground">Filter by tutor</Typography.Text>
+          <Select
+            allowClear
+            showSearch
+            placeholder="All tutors"
+            className="min-w-[280px] w-full max-w-md"
+            optionFilterProp="label"
+            loading={tutorsLoading}
+            value={tutorFilterId}
+            onChange={(v) => setTutorFilterId(v)}
+            options={tutorSelectOptions}
+          />
+        </div>
+      ) : null}
+
+      {isTutor ? (
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <Typography.Text className="text-muted-foreground">Filter by student</Typography.Text>
+          <Input.Search
+            allowClear
+            placeholder="Name, email, or student code — press Enter"
+            className="max-w-md w-full"
+            enterButton
+            onSearch={(v) => setStudentSearch(v.trim() || undefined)}
+          />
+        </div>
+      ) : null}
 
       <Tabs activeKey={activeTab} onChange={setActiveTab} items={items} />
 

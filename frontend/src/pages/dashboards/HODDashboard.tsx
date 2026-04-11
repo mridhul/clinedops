@@ -31,9 +31,9 @@ const HODDashboard: React.FC = () => {
 
       {/* Quick Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Card className="border-none shadow-xl shadow-primary/5 bg-surface-lowest group hover:shadow-2xl transition-all duration-300">
+        <Card className="glass-card shadow-premium bg-surface-lowest group hover:shadow-[0_20px_50px_rgba(43,52,56,0.1)] transition-shadow duration-300">
           <CardHeader>
-            <div className="bg-primary/10 w-12 h-12 rounded-2xl flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
+            <div className="bg-primary/10 w-12 h-12 rounded-lg flex items-center justify-center text-primary mb-4 group-hover:scale-105 transition-transform">
               <Users size={24} />
             </div>
             <CardTitle className="text-xl font-bold">Shadowing Applications</CardTitle>
@@ -42,16 +42,16 @@ const HODDashboard: React.FC = () => {
           <CardContent>
             <Button 
                 onClick={() => navigate('/dashboard/shadowing')} 
-                className="w-full primary-gradient font-bold py-6 rounded-xl flex items-center justify-center gap-2"
+                className="w-full font-bold py-6 rounded-md flex items-center justify-center gap-2"
             >
               Manage Applications <ArrowRight size={18} />
             </Button>
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-xl shadow-tertiary/5 bg-surface-lowest group hover:shadow-2xl transition-all duration-300">
+        <Card className="glass-card shadow-premium bg-surface-lowest group hover:shadow-[0_20px_50px_rgba(43,52,56,0.1)] transition-shadow duration-300">
           <CardHeader>
-            <div className="bg-tertiary/10 w-12 h-12 rounded-2xl flex items-center justify-center text-tertiary mb-4 group-hover:scale-110 transition-transform">
+            <div className="bg-[rgba(0,104,123,0.12)] w-12 h-12 rounded-lg flex items-center justify-center text-[#0a4a56] mb-4 group-hover:scale-105 transition-transform">
               <TrendingUp size={24} />
             </div>
             <CardTitle className="text-xl font-bold">Strategic Insights</CardTitle>
@@ -60,7 +60,7 @@ const HODDashboard: React.FC = () => {
           <CardContent>
             <Button 
                 onClick={() => navigate('/dashboard/strategic-insights')} 
-                className="w-full bg-tertiary text-white font-bold py-6 rounded-xl hover:bg-tertiary/90 flex items-center justify-center gap-2"
+                className="w-full bg-secondary text-secondary-foreground font-bold py-6 rounded-md hover:bg-secondary/90 flex items-center justify-center gap-2"
             >
               View Analytics <ArrowRight size={18} />
             </Button>
@@ -70,33 +70,33 @@ const HODDashboard: React.FC = () => {
 
       {/* Oversight Insights Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1 p-6 bg-slate-50 rounded-2xl border border-slate-200/50 flex flex-col justify-between">
+          <div className="lg:col-span-1 p-6 rounded-lg glass-card flex flex-col justify-between bg-surface-low/80">
               <div>
-                  <Award className="text-amber-500 mb-4" size={32} />
-                  <h3 className="font-bold text-lg">Recognition Tracks</h3>
-                  <p className="text-sm text-slate-500 mt-2">Identify top-performing tutors for annual education awards.</p>
+                  <Award className="text-secondary mb-4" size={32} />
+                  <h3 className="font-manrope font-bold text-lg">Recognition tracks</h3>
+                  <p className="text-sm text-muted-foreground mt-2">Identify top-performing tutors for annual education awards.</p>
               </div>
-              <Button variant="link" className="p-0 text-amber-600 font-bold justify-start mt-6 hover:translate-x-1 transition-transform">
+              <Button variant="link" className="p-0 text-secondary font-bold justify-start mt-6">
                   See nominations <ArrowRight size={16} className="ml-1" />
               </Button>
           </div>
-          <div className="lg:col-span-1 p-6 bg-indigo-50 rounded-2xl border border-indigo-200/50 flex flex-col justify-between">
+          <div className="lg:col-span-1 p-6 rounded-lg glass-card flex flex-col justify-between" style={{ background: 'var(--cd-tertiary-container)' }}>
               <div>
-                  <ShieldCheck className="text-indigo-500 mb-4" size={32} />
-                  <h3 className="font-bold text-lg">Governance Review</h3>
-                  <p className="text-sm text-slate-500 mt-2">Audit clinical teaching compliance across your discipline.</p>
+                  <ShieldCheck className="text-[#0a4a56] mb-4" size={32} />
+                  <h3 className="font-manrope font-bold text-lg" style={{ color: 'var(--cd-on-tertiary-container)' }}>Governance review</h3>
+                  <p className="text-sm mt-2 opacity-90" style={{ color: 'var(--cd-on-tertiary-container)' }}>Audit clinical teaching compliance across your discipline.</p>
               </div>
-              <Button variant="link" className="p-0 text-indigo-600 font-bold justify-start mt-6 hover:translate-x-1 transition-transform">
+              <Button variant="link" className="p-0 font-bold justify-start mt-6" style={{ color: 'var(--cd-on-tertiary-container)' }}>
                   View reports <ArrowRight size={16} className="ml-1" />
               </Button>
           </div>
-          <div className="lg:col-span-1 p-6 bg-rose-50 rounded-2xl border border-rose-200/50 flex flex-col justify-between">
+          <div className="lg:col-span-1 p-6 rounded-lg glass-card flex flex-col justify-between bg-destructive/5">
               <div>
-                  <Search className="text-rose-500 mb-4" size={32} />
-                  <h3 className="font-bold text-lg">Audit Opportunities</h3>
-                  <p className="text-sm text-slate-500 mt-2">Surface negative trends for targeted educational intervention.</p>
+                  <Search className="text-destructive mb-4" size={32} />
+                  <h3 className="font-manrope font-bold text-lg">Audit opportunities</h3>
+                  <p className="text-sm text-muted-foreground mt-2">Surface trends that need targeted educational intervention.</p>
               </div>
-              <Button variant="link" className="p-0 text-rose-600 font-bold justify-start mt-6 hover:translate-x-1 transition-transform">
+              <Button variant="link" className="p-0 text-destructive font-bold justify-start mt-6">
                   Run specific audit <ArrowRight size={16} className="ml-1" />
               </Button>
           </div>

@@ -10,6 +10,22 @@ type ApiFetchOptions = {
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string | undefined
 
+function messageFromErrorBody(json: unknown, fallback: string): string {
+  if (!json || typeof json !== 'object') return fallback
+  const j = json as Record<string, unknown>
+  if (Array.isArray(j.errors) && j.errors.length > 0) {
+    const first = j.errors[0] as { message?: string }
+    if (typeof first?.message === 'string' && first.message) return first.message
+  }
+  const detail = j.detail
+  if (typeof detail === 'string' && detail) return detail
+  if (Array.isArray(detail) && detail.length > 0) {
+    const first = detail[0] as { msg?: string }
+    if (typeof first?.msg === 'string' && first.msg) return first.msg
+  }
+  return fallback
+}
+
 export function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
   const url = `${API_BASE_URL ?? ''}${path}`
   const token = options.accessToken ?? useAuth.getState().accessToken
@@ -27,10 +43,10 @@ export function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promis
     .then(async (res) => {
       const json: Envelope<T> = await res.json().catch(() => null)
       if (!res.ok) {
-        throw new Error(json?.errors?.[0]?.message ?? `Request failed: ${res.status}`)
+        throw new Error(messageFromErrorBody(json, `Request failed: ${res.status}`))
       }
       if (json?.errors?.length) {
-        throw new Error(json.errors[0]?.message ?? 'Request failed')
+        throw new Error(messageFromErrorBody(json, 'Request failed'))
       }
       return json?.data as T
     })
@@ -49,10 +65,10 @@ export function apiPostForm<T>(path: string, formData: FormData, accessToken: st
   }).then(async (res) => {
     const json: Envelope<T> = await res.json().catch(() => null)
     if (!res.ok) {
-      throw new Error(json?.errors?.[0]?.message ?? `Request failed: ${res.status}`)
+      throw new Error(messageFromErrorBody(json, `Request failed: ${res.status}`))
     }
     if (json?.errors?.length) {
-      throw new Error(json.errors[0]?.message ?? 'Request failed')
+      throw new Error(messageFromErrorBody(json, 'Request failed'))
     }
     return json?.data as T
   })

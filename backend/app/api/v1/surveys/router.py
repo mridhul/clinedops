@@ -23,6 +23,7 @@ from app.schemas.surveys import (
     TutorFeedbackSummary,
     CompletionRateSchema
 )
+from app.services.access import role_value
 from app.services.survey_service import SurveyService
 
 router = APIRouter(tags=["surveys"])
@@ -106,7 +107,7 @@ async def list_student_assignments(
     
     # If student, filter by their student_id
     stmt = select(SurveyAssignment).options(selectinload(SurveyAssignment.template)).where(SurveyAssignment.is_active == True)
-    if actor.role == RoleEnum.student:
+    if role_value(actor) == RoleEnum.student.value:
         student_stmt = select(Student).where(Student.user_id == actor.id)
         student = (await db.execute(student_stmt)).scalar_one_or_none()
         if not student:
@@ -126,6 +127,16 @@ async def submit_survey(
 ) -> Envelope[SurveySubmissionRead]:
     submission = await SurveyService.submit_survey(db, actor=actor, payload=payload)
     return Envelope(data=SurveySubmissionRead.model_validate(submission))
+
+
+@router.get("/submissions/me", response_model=Envelope[List[SurveySubmissionRead]])
+async def list_my_survey_submissions(
+    db: AsyncSession = Depends(get_db_session),
+    actor: User = Depends(require_roles([RoleEnum.student])),
+) -> Envelope[List[SurveySubmissionRead]]:
+    rows = await SurveyService.list_my_submissions(db, actor=actor)
+    return Envelope(data=[SurveySubmissionRead.model_validate(r) for r in rows])
+
 
 # -- Analytics --
 

@@ -70,6 +70,9 @@ class AnomalyFlagOut(BaseModel):
 class SessionStudentOut(BaseModel):
     id: UUID
     student_id: UUID
+    full_name: Optional[str] = None
+    email: Optional[str] = None
+    student_code: Optional[str] = None
     attendance_confirmed_at: Optional[str] = None
 
     model_config = {"from_attributes": True}
@@ -79,6 +82,8 @@ class SessionOut(BaseModel):
     id: UUID
     posting_id: UUID
     tutor_id: UUID
+    tutor_full_name: Optional[str] = None
+    tutor_code: Optional[str] = None
     starts_at: str
     duration_minutes: Optional[int]
     session_type: Optional[str]

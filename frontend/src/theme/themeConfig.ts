@@ -2,10 +2,7 @@ import type { ThemeConfig } from 'antd/es/config-provider/context'
 
 /**
  * Ant Design theme mapping for `designs/DESIGN.md`.
- *
- * Note: DESIGN specifies several visual rules (gradients/glass/ghost-border focus)
- * that are not fully supported by Ant's token system. Those are implemented via
- * `frontend/src/theme/global.css` using the `--cd-*` CSS variables.
+ * Gradients, glass, and fine-grained controls: `frontend/src/theme/global.css` + `--cd-*`.
  */
 export const themeConfig = {
   token: {
@@ -13,16 +10,21 @@ export const themeConfig = {
     colorPrimaryHover: 'var(--cd-primary-dim)',
 
     colorBgBase: 'var(--cd-surface)',
-    colorBgContainer: '#ffffff', // Clean white background for cards/inputs
+    colorBgContainer: 'var(--cd-surface-container-lowest)',
     colorBgElevated: 'var(--cd-surface-container-lowest)',
+    colorFillSecondary: 'var(--cd-surface-container-highest)',
+    colorFillTertiary: 'var(--cd-surface-container-low)',
 
+    colorText: 'var(--cd-on-surface)',
     colorTextSecondary: 'var(--cd-on-surface-variant)',
     colorError: 'var(--cd-error)',
 
-    borderRadius: 8, // Softer, more modern borders
-    controlHeight: 40, // Taller buttons and inputs for a premium feel
+    /* DESIGN.md rounded-md (6px) */
+    borderRadius: 6,
+    controlHeight: 40,
 
-    colorBorder: '#dbe4ea', // Subtle borders
+    colorBorder: 'var(--cd-surface-container-highest)',
+    colorBorderSecondary: 'var(--cd-surface-container-highest)',
     lineWidth: 1,
 
     fontFamily: 'var(--cd-font-body-family)',
@@ -30,46 +32,76 @@ export const themeConfig = {
       "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
     fontSize: 14,
     fontSizeSM: 12,
+    fontSizeHeading1: 32,
+    fontSizeHeading2: 24,
+    fontSizeHeading3: 20,
   },
   components: {
     Button: {
       paddingInline: 20,
       fontWeight: 500,
-      controlHeight: 42,
+      controlHeight: 40,
+      borderRadius: 6,
     },
     Input: {
       paddingInline: 14,
       paddingBlock: 8,
-      activeShadow: '0 0 0 3px rgba(0, 93, 182, 0.1)',
-      errorActiveShadow: '0 0 0 3px rgba(159, 64, 61, 0.1)',
-      hoverBorderColor: '#bac7d5',
+      colorBgContainer: 'var(--cd-surface-container-highest)',
+      activeBorderColor: 'var(--cd-primary)',
+      hoverBorderColor: 'transparent',
+      activeShadow: '0 0 0 2px rgba(0, 93, 182, 0.2)',
+      errorActiveShadow: '0 0 0 2px rgba(159, 64, 61, 0.28)',
+    },
+    InputNumber: {
+      paddingInline: 14,
+      controlHeight: 40,
+      borderRadius: 6,
+      colorBgContainer: 'var(--cd-surface-container-highest)',
+      activeBorderColor: 'var(--cd-primary)',
+      hoverBorderColor: 'transparent',
+      activeShadow: '0 0 0 2px rgba(0, 93, 182, 0.2)',
+      errorActiveShadow: '0 0 0 2px rgba(159, 64, 61, 0.28)',
+    },
+    Form: {
+      labelRequiredMarkColor: 'var(--cd-primary)',
+      verticalLabelPadding: '0 0 8px',
     },
     Select: {
       controlHeight: 40,
       controlPaddingHorizontal: 14,
+      colorBgContainer: 'var(--cd-surface-container-highest)',
+      optionSelectedBg: 'var(--cd-surface-container-low)',
     },
     DatePicker: {
       controlHeight: 40,
       paddingInline: 14,
+      colorBgContainer: 'var(--cd-surface-container-highest)',
     },
     Card: {
       headerFontSize: 16,
       headerFontSizeSM: 14,
+      borderRadiusLG: 8,
     },
     Table: {
       headerBg: 'var(--cd-surface-container-low)',
       headerColor: 'var(--cd-on-surface-variant)',
       headerSplitColor: 'transparent',
-      borderColor: 'var(--cd-surface-container-highest)',
+      borderColor: 'transparent',
       rowHoverBg: 'var(--cd-surface-container-low)',
-      padding: 16,
+      paddingContentVerticalLG: 12,
     },
     Menu: {
-      itemBorderRadius: 8,
+      itemBorderRadius: 6,
       activeBarBorderWidth: 0,
       itemHeight: 44,
       iconSize: 18,
-    }
-  }
+    },
+    Tabs: {
+      horizontalMargin: '0 0 12px 0',
+    },
+    Modal: {
+      borderRadiusLG: 12,
+      boxShadow: '0px 20px 50px rgba(43, 52, 56, 0.08)',
+    },
+  },
 } as unknown as ThemeConfig
-

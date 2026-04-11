@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, Card, Descriptions, Space, Tag, Typography } from 'antd'
+import { Alert, Badge, Button, Card, Descriptions, Space, Table, Tag, Typography } from 'antd'
 import dayjs from 'dayjs'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useApproveSession, useSubmitSession, useTeachingSession } from '../../api/teachingHours'
@@ -98,13 +98,39 @@ export default function SessionDetailPage() {
 
         <Card title="Students">
           {session.session_students.length > 0 ? (
-            <ul>
-              {session.session_students.map(s => (
-                <li key={s.id}>
-                  {s.student_id} {s.attendance_confirmed_at ? <Tag color="success">Confirmed</Tag> : <Tag>Pending Confirmation</Tag>}
-                </li>
-              ))}
-            </ul>
+            <Table
+              size="small"
+              pagination={false}
+              rowKey="id"
+              dataSource={session.session_students}
+              columns={[
+                {
+                  title: 'Name',
+                  key: 'name',
+                  render: (_: unknown, row) => row.full_name?.trim() || <Text type="secondary">—</Text>,
+                },
+                {
+                  title: 'Email',
+                  key: 'email',
+                  render: (_: unknown, row) => row.email || <Text type="secondary">—</Text>,
+                },
+                {
+                  title: 'Student code',
+                  key: 'student_code',
+                  render: (_: unknown, row) => row.student_code || <Text type="secondary">—</Text>,
+                },
+                {
+                  title: 'Attendance',
+                  key: 'attendance',
+                  render: (_: unknown, row) =>
+                    row.attendance_confirmed_at ? (
+                      <Tag color="success">Confirmed</Tag>
+                    ) : (
+                      <Tag>Pending confirmation</Tag>
+                    ),
+                },
+              ]}
+            />
           ) : (
             <Text type="secondary">No students linked to this session.</Text>
           )}

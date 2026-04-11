@@ -9,6 +9,9 @@ export interface AnomalyFlag {
 export interface SessionStudentOut {
   id: string
   student_id: string
+  full_name?: string | null
+  email?: string | null
+  student_code?: string | null
   attendance_confirmed_at: string | null
 }
 
@@ -16,6 +19,8 @@ export interface TeachingSessionOut {
   id: string
   posting_id: string
   tutor_id: string
+  tutor_full_name?: string | null
+  tutor_code?: string | null
   starts_at: string
   duration_minutes: number | null
   session_type: SessionType | null

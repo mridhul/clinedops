@@ -60,7 +60,7 @@ const SurveyFillingPage: React.FC = () => {
     submitMutation.mutate({
       assignment_id: assignment.id,
       template_id: assignment.template_id,
-      student_id: profile.id, // Assuming profile.id is the student_id or linked
+      student_id: assignment.student_id,
       responses
     }, {
       onSuccess: () => setIsSubmitted(true)

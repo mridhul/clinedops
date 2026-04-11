@@ -70,6 +70,7 @@ async def list_tutors(
     items = [
         TutorListItem(
             id=t.id,
+            user_id=t.user_id,
             tutor_code=t.tutor_code,
             email=u.email,
             full_name=u.full_name,
@@ -96,9 +97,57 @@ async def create_tutor(
     dup = await session.execute(select(Tutor).where(Tutor.tutor_code == payload.tutor_code))
     if dup.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="tutor_code already exists")
-    dup_e = await session.execute(select(User).where(User.email == payload.email))
-    if dup_e.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="email already exists")
+
+    existing_user = (await session.execute(select(User).where(User.email == payload.email))).scalar_one_or_none()
+
+    if existing_user:
+        if role_value(existing_user) != RoleEnum.tutor.value:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "A user with this email already exists with a different role. "
+                    "Change the role in Admin Console or use another email."
+                ),
+            )
+        if (
+            await session.execute(select(Tutor).where(Tutor.user_id == existing_user.id))
+        ).scalar_one_or_none():
+            raise HTTPException(status_code=400, detail="Tutor profile already exists for this email")
+
+        if payload.password:
+            existing_user.hashed_password = hash_password(payload.password)
+        if payload.full_name is not None:
+            existing_user.full_name = payload.full_name
+        existing_user.discipline = payload.discipline
+
+        tu = Tutor(
+            user_id=existing_user.id,
+            tutor_code=payload.tutor_code,
+            discipline=payload.discipline,
+            department_id=payload.department_id,
+            academic_cycle_id=payload.academic_cycle_id,
+            created_by=actor.id,
+        )
+        session.add(tu)
+        await session.flush()
+
+        await record_audit(
+            session,
+            actor_id=actor.id,
+            action="CREATE",
+            entity_type="tutor",
+            entity_id=tu.id,
+            before_state=None,
+            after_state=_tutor_state_dict(tu, existing_user),
+        )
+        await session.commit()
+        return await get_tutor_detail(session, actor=actor, tutor_id=tu.id)
+
+    if not payload.password:
+        raise HTTPException(
+            status_code=400,
+            detail="Password is required when creating a new user account",
+        )
 
     user = User(
         email=payload.email,
@@ -156,6 +205,7 @@ async def get_tutor_detail(
 
     return TutorDetail(
         id=t.id,
+        user_id=t.user_id,
         tutor_code=t.tutor_code,
         email=user.email,
         full_name=user.full_name,

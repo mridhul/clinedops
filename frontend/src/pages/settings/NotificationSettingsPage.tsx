@@ -44,14 +44,14 @@ const NotificationSettingsPage: React.FC = () => {
   return (
     <div className="container mx-auto p-6 max-w-3xl space-y-8">
       <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-primary flex items-center gap-3">
-          <BellRing className="w-8 h-8 opacity-80" /> Notification Preferences
+        <h1 className="text-4xl font-manrope font-extrabold tracking-tight text-foreground flex items-center gap-3">
+          <BellRing className="w-8 h-8 text-primary opacity-90" /> Notification preferences
         </h1>
         <p className="text-muted-foreground mt-2 text-sm">Configure how you receive alerts and summaries.</p>
       </div>
 
-      <Card className="border-none shadow-premium glass">
-        <CardHeader className="border-b border-border/50 bg-muted/10">
+      <Card className="border-0 shadow-premium glass-card overflow-hidden">
+        <CardHeader className="bg-surface-low/50 pb-4">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Mail className="w-5 h-5" /> Email Notifications
           </CardTitle>
@@ -67,26 +67,29 @@ const NotificationSettingsPage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="flex flex-col gap-8">
               {TYPES.map((type) => {
                 const isEnabled = getIsEnabled(type.id);
                 return (
-                  <div key={type.id} className="flex items-start justify-between space-x-4">
-                    <div className="space-y-1">
-                      <Label htmlFor={type.id} className="text-base font-semibold text-foreground">
+                  <div key={type.id} className="flex items-start justify-between gap-4">
+                    <div className="space-y-1 min-w-0">
+                      <Label htmlFor={`pref-${type.id}`} className="text-base font-semibold text-foreground">
                         {type.label}
                       </Label>
                       <p className="text-sm text-muted-foreground leading-snug">
                         {type.desc}
                       </p>
                     </div>
-                    {/* Simplified switch logic for layout sake without exact shadcn Switch import */}
-                    <div className="pt-1">
-                      <button 
+                    <div className="pt-1 shrink-0">
+                      <button
+                        type="button"
+                        id={`pref-${type.id}`}
+                        role="switch"
+                        aria-checked={isEnabled}
                         onClick={() => handleToggle(type.id, isEnabled)}
-                        className={`w-11 h-6 rounded-full transition-colors ${isEnabled ? 'bg-primary' : 'bg-muted'} relative inline-flex items-center justify-center`}
+                        className={`w-11 h-6 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 ${isEnabled ? 'primary-gradient' : 'bg-muted'} relative inline-flex items-center justify-center`}
                       >
-                         <span className={`w-4 h-4 rounded-full bg-white transition-transform ${isEnabled ? 'translate-x-[10px]' : '-translate-x-[10px]'}`} />
+                         <span className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${isEnabled ? 'translate-x-[10px]' : '-translate-x-[10px]'}`} />
                       </button>
                     </div>
                   </div>
