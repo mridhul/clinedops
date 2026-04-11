@@ -44,8 +44,9 @@ class Settings(BaseSettings):
     # AI Help (RAG + Groq)
     groq_api_key: Optional[str] = None
     groq_model: str = "llama-3.3-70b-versatile"
-    # Source documents (.md/.pdf) for index builds; see app.scripts.build_rag_index (env RAG_DOCS_PATH).
-    rag_docs_path: str = "/DOCS"
+    # Source folder (.md/.pdf) for index builds; see app.scripts.build_rag_index.
+    # In Docker this is /RAG; locally override via RAG_DOCS_PATH in backend/.env.
+    rag_docs_path: str = "/RAG"
     rag_index_path: str = "/rag_data"
     rag_retrieval_k: int = 4
 

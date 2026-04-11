@@ -13,10 +13,11 @@ COPY backend/docker ./docker
 
 RUN pip install --no-cache-dir -U pip && pip install --no-cache-dir .
 
-# Knowledge base for RAG: source folder relative to image build context (repo root). See RAG_DOCS_BUILD_PATH in docker-compose.
-ARG RAG_DOCS_BUILD_PATH=DOCS
-COPY ${RAG_DOCS_BUILD_PATH} /DOCS
-ENV RAG_DOCS_PATH=/DOCS
+# Knowledge base for RAG: source folder relative to image build context (repo root).
+# Default is the RAG/ folder. Override with RAG_DOCS_BUILD_PATH build arg if needed.
+ARG RAG_DOCS_BUILD_PATH=RAG
+COPY ${RAG_DOCS_BUILD_PATH} /RAG
+ENV RAG_DOCS_PATH=/RAG
 ENV RAG_INDEX_PATH=/rag_data
 RUN mkdir -p /rag_data && python -m app.scripts.build_rag_index
 

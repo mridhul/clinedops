@@ -2,8 +2,8 @@ x-backend-image-build: &backend_image_build
   context: .
   dockerfile: backend/Dockerfile
   args:
-    # Relative to repo root only (e.g. DOCS or mykb). Not the same as RAG_DOCS_PATH in backend/.env for local index builds.
-    RAG_DOCS_BUILD_PATH: ${RAG_DOCS_BUILD_PATH:-DOCS}
+    # Relative to repo root (e.g. RAG or mykb). Copied into the image as /RAG at build time.
+    RAG_DOCS_BUILD_PATH: ${RAG_DOCS_BUILD_PATH:-RAG}
 
 services:
   db:
@@ -48,7 +48,7 @@ services:
       # After migrations, seed DEMO.md personas once (superadmin@nuhs.edu.sg absent). Set to 0 to skip.
       AUTO_SEED_DEMO: "1"
       RAG_INDEX_PATH: /rag_data
-      RAG_DOCS_PATH: /DOCS
+      RAG_DOCS_PATH: /RAG
     depends_on:
       - db
       - redis
@@ -56,6 +56,7 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - rag_data:/rag_data
       - reports_data:/data/reports
 
   celery:
@@ -105,4 +106,5 @@ services:
 volumes:
   db_data:
   reports_data:
+  rag_data:
 
