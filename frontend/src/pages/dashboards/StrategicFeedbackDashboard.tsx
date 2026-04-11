@@ -23,7 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { useStrategicAnalytics } from '@/api/analytics';
 import type { RecognitionHighlight, ImprovementOpportunity } from '@/api/analytics';
 
-const COLORS = ['#6366f1', '#8b5cf6', '#a855f7', '#d946ef'];
+const COLORS = ['#005db6', '#00687b', '#4f607c', '#0051a1'];
 
 const StrategicFeedbackDashboard: React.FC = () => {
   const { data, isLoading } = useStrategicAnalytics();
@@ -42,11 +42,11 @@ const StrategicFeedbackDashboard: React.FC = () => {
           <p className="text-muted-foreground mt-1 text-lg font-medium">Programme quality and educator excellence across all disciplines.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="rounded-xl font-bold gap-2">
-            <Download size={18} /> Export Governance Report
+          <Button variant="outline" className="rounded-md font-bold gap-2 border-border/60">
+            <Download size={18} /> Export governance report
           </Button>
-          <Button className="rounded-xl font-bold bg-primary text-primary-foreground shadow-lg shadow-primary/20">
-            Generate Q1 Summary
+          <Button className="rounded-md font-bold primary-gradient text-primary-foreground shadow-[0_4px_14px_rgba(0,93,182,0.2)]">
+            Generate Q1 summary
           </Button>
         </div>
       </div>
@@ -78,7 +78,7 @@ const StrategicFeedbackDashboard: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="glass-card border-none shadow-sm relative overflow-hidden group bg-amber-50/30 border-l-4 border-l-amber-400">
+        <Card className="glass-card border-none shadow-sm relative overflow-hidden group bg-amber-50/50">
           <CardHeader className="pb-2">
             <CardDescription className="text-xs font-bold uppercase tracking-widest text-amber-600">Intervention Areas</CardDescription>
             <CardTitle className="text-5xl font-manrope font-extrabold text-amber-700">{data.improvement_opportunities.length}</CardTitle>

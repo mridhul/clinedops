@@ -64,14 +64,17 @@ export default function StudentsListPage() {
 
   return (
     <>
-      <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <Typography.Title level={3} style={{ margin: 0 }}>
+      <Space style={{ marginBottom: 24, width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+        <Typography.Title level={2} style={{ margin: 0 }} className="!font-manrope">
           Students
         </Typography.Title>
         <Space wrap>
           <Button onClick={exportCsv}>Export CSV</Button>
           <Link to="/dashboard/students/import">
             <Button>Batch Import</Button>
+          </Link>
+          <Link to="/dashboard/postings">
+            <Button>Postings</Button>
           </Link>
           <Link to="/dashboard/students/new">
             <Button type="primary">Add Student</Button>

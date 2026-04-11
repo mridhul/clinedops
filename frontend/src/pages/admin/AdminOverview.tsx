@@ -31,7 +31,7 @@ const AdminOverview: React.FC = () => {
         </Typography>
       </div>
 
-      <div className="bg-surface glass rounded-2xl border border-border/40 shadow-premium p-4 md:p-6">
+      <div className="glass-card cd-glass rounded-lg shadow-premium p-4 md:p-6">
         <Tabs
           defaultActiveKey="audit"
           tabPosition={tabPosition}

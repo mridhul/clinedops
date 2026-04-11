@@ -1,7 +1,8 @@
-import { Button, Space, Table, Tag, Typography } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
+import { Button, Input, Space, Table, Tag, Typography } from 'antd'
+import type { ColumnsType, ColumnType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom'
+import { SearchOutlined } from '@ant-design/icons'
 import { useConfirmAttendance, useTeachingSessions } from '../../api/teachingHours'
 import type { TeachingSessionOut } from '../../types/teachingHours'
 
@@ -12,16 +13,65 @@ export default function MySessionsPage() {
   const { data, isLoading } = useTeachingSessions()
   const confirmMutation = useConfirmAttendance()
 
+  const getColumnSearchProps = (dataIndex: keyof TeachingSessionOut, title: string): ColumnType<TeachingSessionOut> => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+      <div style={{ padding: 8 }}>
+        <Input
+          placeholder={`Search ${title}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => confirm()}
+          style={{ marginBottom: 8, display: 'block' }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => confirm()}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Search
+          </Button>
+          <Button onClick={() => clearFilters && clearFilters()} size="small" style={{ width: 90 }}>
+            Reset
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered: boolean) => (
+      <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+    ),
+    onFilter: (value, record) => {
+      const targetValue = record[dataIndex]
+      if (typeof targetValue !== 'string') return false
+      return targetValue.toLowerCase().includes((value as string).toLowerCase())
+    },
+    filterDropdownProps: {
+      onOpenChange: (visible) => {
+        if (visible) {
+          // focus logic could go here
+        }
+      },
+    },
+  })
+
   const columns: ColumnsType<TeachingSessionOut> = [
     {
       title: 'Date',
       dataIndex: 'starts_at',
       render: (val: string) => dayjs(val).format('DD MMM YYYY HH:mm'),
+      sorter: (a, b) => dayjs(a.starts_at).unix() - dayjs(b.starts_at).unix(),
     },
     {
       title: 'Tutor',
-      dataIndex: 'tutor_id',
-      render: (val: string) => `Tutor: ${val.substring(0, 8)}`,
+      ...getColumnSearchProps('tutor_full_name', 'Tutor'),
+      render: (_, record) => (
+        <Space direction="vertical" size={0}>
+          <Text strong>{record.tutor_full_name || 'Unknown Tutor'}</Text>
+          <Text type="secondary" style={{ fontSize: '12px' }}>{record.tutor_code || record.tutor_id.substring(0, 8)}</Text>
+        </Space>
+      ),
     },
     {
       title: 'Duration',

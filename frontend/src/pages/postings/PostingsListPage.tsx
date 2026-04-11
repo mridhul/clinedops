@@ -47,8 +47,8 @@ export default function PostingsListPage() {
 
   return (
     <>
-      <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <Typography.Title level={3} style={{ margin: 0 }}>
+      <Space style={{ marginBottom: 24, width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+        <Typography.Title level={2} style={{ margin: 0 }} className="!font-manrope">
           Postings
         </Typography.Title>
         {(useAuth.getState().profile?.role === 'super_admin' || useAuth.getState().profile?.role === 'programme_admin') && (

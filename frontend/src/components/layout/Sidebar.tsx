@@ -58,7 +58,7 @@ const Sidebar: React.FC = () => {
     { icon: LayoutDashboard, label: 'Templates', href: '/dashboard/surveys/templates', show: isAdmin },
     { icon: Users, label: 'User Management', href: '/dashboard/students', show: isAdmin },
     { icon: BarChart3, label: 'Reports', href: '/dashboard/reports', show: canSeeReports },
-    { icon: Shield, label: 'Admin Console', href: '/dashboard/admin', show: isAdmin },
+    { icon: Shield, label: 'Admin Console', href: '/dashboard/admin', show: isSuperAdmin },
     {
       icon: Megaphone,
       label: 'Broadcasts',
@@ -69,7 +69,7 @@ const Sidebar: React.FC = () => {
 
   return (
     <>
-      <aside className="h-screen w-64 fixed left-0 top-0 pt-20 bg-surface-low border-r border-border/20 z-40 hidden lg:flex flex-col">
+      <aside className="h-screen w-64 fixed left-0 top-0 pt-20 bg-surface-low z-40 hidden lg:flex flex-col shadow-[4px_0_32px_rgba(43,52,56,0.04)]">
         <div className="px-8 py-4 mb-6">
           <h2 className="font-manrope font-bold text-primary text-lg">Medical Affairs</h2>
           <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold opacity-70">Clinical Curator</p>
@@ -83,10 +83,10 @@ const Sidebar: React.FC = () => {
                 key={item.label}
                 to={item.href}
                 className={cn(
-                  "px-8 py-3 flex items-center gap-3 font-inter text-sm font-medium transition-all duration-200 hover:translate-x-1 group",
+                  "px-8 py-3 flex items-center gap-3 font-inter text-sm font-medium transition-all duration-200 hover:translate-x-0.5 group rounded-l-full ml-3",
                   isActive 
-                    ? "bg-surface-lowest text-primary shadow-sm rounded-l-full ml-4 pl-4 border-y border-l border-border/30" 
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-surface-lowest text-primary shadow-[0_4px_20px_rgba(43,52,56,0.06)] pl-5" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-surface-lowest/60 pl-4"
                 )}
               >
                 <item.icon size={18} className={cn(isActive ? "text-primary" : "text-muted-foreground group-hover:text-primary transition-colors")} />
@@ -98,14 +98,14 @@ const Sidebar: React.FC = () => {
 
         <div className="p-6 mb-4">
           {(isTutor || isStudent) && (
-            <Button className="w-full primary-gradient text-white py-6 rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all active:scale-95 flex items-center gap-2 group">
+            <Button className="w-full primary-gradient text-white py-6 rounded-md font-bold text-sm shadow-[0_4px_14px_rgba(0,93,182,0.2)] hover:shadow-[0_6px_20px_rgba(0,93,182,0.25)] transition-all flex items-center gap-2 group">
               <Plus size={16} className="group-hover:rotate-90 transition-transform duration-300" />
               {isStudent ? 'Request Session' : 'Log Teaching Hours'}
             </Button>
           )}
         </div>
 
-        <div className="border-t border-border/20 pt-4 pb-12">
+        <div className="pt-6 pb-12 mt-2 shadow-[0_-12px_32px_-28px_rgba(43,52,56,0.12)]">
           <a href="#" className="text-muted-foreground hover:text-foreground px-8 py-2.5 flex items-center gap-3 font-inter text-sm font-medium transition-colors">
             <HelpCircle size={18} />
             <span>Help Center</span>
@@ -121,7 +121,7 @@ const Sidebar: React.FC = () => {
       </aside>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t border-border/40 z-50 flex lg:hidden items-center justify-around h-16 px-2 safe-area-pb">
+      <nav className="fixed bottom-0 left-0 right-0 cd-glass shadow-[0_-4px_24px_rgba(43,52,56,0.06)] z-50 flex lg:hidden items-center justify-around h-16 px-2 safe-area-pb">
         {navItems.filter(item => item.show).slice(0, 5).map((item) => {
           const isActive = window.location.pathname === item.href;
           return (

@@ -185,9 +185,9 @@ const ShadowingApplicationsPage: React.FC = () => {
               placeholder="Search by name or code"
               optionFilterProp="children"
             >
-              {tutors.map((t: any) => (
+              {tutors.map((t: TutorListItem) => (
                 <Select.Option key={t.user_id} value={t.user_id}>
-                  {t.user.full_name} ({t.tutor_code}) - {t.discipline}
+                  {t.full_name} ({t.tutor_code}) - {t.discipline}
                 </Select.Option>
               ))}
             </Select>

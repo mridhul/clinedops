@@ -1,8 +1,8 @@
 import React from 'react';
-import { Bell, Settings } from 'lucide-react';
+import { Bell, Settings, LogOut } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/auth/useAuth';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, NavLink } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,42 +42,50 @@ const GlassHeader: React.FC = () => {
   const getNotificationIconColor = (type: string) => {
     switch(type) {
         case 'LOW_SCORE_ALERT': return 'text-destructive';
-        case 'HOURS_APPROVED': return 'text-green-500';
+        case 'HOURS_APPROVED': return 'text-[#0a4a56]';
         case 'HOURS_REJECTED': return 'text-destructive';
-        case 'DEADLINE_APPROACHING': return 'text-amber-500';
+        case 'DEADLINE_APPROACHING': return 'text-secondary';
         default: return 'text-primary';
     }
   };
 
   return (
-    <nav className="fixed top-0 w-full z-50 glass border-b border-border/50 flex justify-between items-center px-4 md:px-8 h-16 transition-all duration-300">
+    <nav className="fixed top-0 w-full z-50 cd-glass shadow-[0_1px_0_rgba(43,52,56,0.06)] flex justify-between items-center px-4 md:px-8 h-16 transition-[background,box-shadow] duration-300">
       <div className="flex items-center gap-8">
-        <span className="text-lg md:text-xl font-extrabold text-primary tracking-tighter cursor-default whitespace-nowrap">
+        <span className="text-lg md:text-xl font-manrope font-extrabold text-primary tracking-tighter cursor-default whitespace-nowrap">
           ClinEdOps
         </span>
-        <div className="hidden lg:flex items-center gap-6">
-          <Link to="/dashboard" className="text-secondary border-b-2 border-secondary pb-1 font-manrope font-bold text-lg tracking-tight">
-            Dashboard
-          </Link>
-          <Link to="/dashboard/teaching-sessions" className="text-muted-foreground hover:text-primary font-manrope font-bold text-lg tracking-tight transition-colors">
-            Teaching Hours
-          </Link>
-          <Link to="/dashboard/billing-hours" className="text-muted-foreground hover:text-primary font-manrope font-bold text-lg tracking-tight transition-colors">
-            Billing
-          </Link>
-          <Link to="/dashboard/surveys/pending" className="text-muted-foreground hover:text-primary font-manrope font-bold text-lg tracking-tight transition-colors">
-            Surveys
-          </Link>
-          <Link to="/dashboard/reports" className="text-muted-foreground hover:text-primary font-manrope font-bold text-lg tracking-tight transition-colors">
-            Reports
-          </Link>
+        <div className="hidden lg:flex items-center gap-1">
+          {(
+            [
+              ['/dashboard', 'Dashboard'],
+              ['/dashboard/teaching-sessions', 'Teaching Hours'],
+              ['/dashboard/billing-hours', 'Billing'],
+              ['/dashboard/surveys/pending', 'Surveys'],
+              ['/dashboard/reports', 'Reports'],
+            ] as const
+          ).map(([to, label]) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                `rounded-md px-3 py-2 font-manrope text-sm font-bold tracking-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 ${
+                  isActive
+                    ? 'bg-secondary/10 text-secondary'
+                    : 'text-muted-foreground hover:bg-surface-low hover:text-foreground'
+                }`
+              }
+            >
+              {label}
+            </NavLink>
+          ))}
         </div>
       </div>
 
       <div className="flex items-center gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div className="relative p-2 hover:bg-accent rounded-full transition-colors cursor-pointer text-muted-foreground hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+            <div className="relative p-2 hover:bg-secondary/10 rounded-full transition-colors cursor-pointer text-muted-foreground hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2">
               <Bell size={20} />
               {unreadCount > 0 && (
                 <Badge 
@@ -89,7 +97,7 @@ const GlassHeader: React.FC = () => {
               )}
             </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
+          <DropdownMenuContent align="end" className="w-80 glass-card border-0 shadow-premium p-0">
             <DropdownMenuLabel className="flex justify-between items-center">
               <span>Notifications</span>
               {unreadCount > 0 && (
@@ -144,7 +152,7 @@ const GlassHeader: React.FC = () => {
           <Settings size={20} />
         </div>
         
-        <div className="flex items-center gap-3 pl-2 border-l border-border/50">
+        <div className="flex items-center gap-3 pl-3 ml-1 shadow-[-12px_0_24px_-20px_rgba(43,52,56,0.15)]">
           <div 
             className="text-right hidden sm:block cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate('/dashboard/settings/profile')}
@@ -157,7 +165,7 @@ const GlassHeader: React.FC = () => {
             </p>
           </div>
           <Avatar 
-            className="h-10 w-10 border-2 border-background shadow-md hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer overflow-hidden bg-muted"
+            className="h-10 w-10 shadow-[0_4px_12px_rgba(43,52,56,0.08)] hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer overflow-hidden bg-surface-highest"
             onClick={() => navigate('/dashboard/settings/profile')}
             title="View Profile Settings"
           >
@@ -171,13 +179,14 @@ const GlassHeader: React.FC = () => {
             </AvatarFallback>
           </Avatar>
           
-          <div 
-            className="ml-1 p-1 hover:bg-accent rounded-md transition-colors cursor-pointer text-muted-foreground hover:text-destructive"
+          <button
+            type="button"
+            className="ml-1 p-2 hover:bg-destructive/10 rounded-md transition-colors cursor-pointer text-muted-foreground hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30"
             onClick={handleSignOut}
             title="Sign Out"
           >
-            <Settings size={16} className="rotate-90" />
-          </div>
+            <LogOut size={18} />
+          </button>
         </div>
       </div>
     </nav>

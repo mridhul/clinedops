@@ -39,9 +39,10 @@ export default function TutorFormPage() {
         notification.success({ message: 'Tutor updated successfully' })
         navigate(`/dashboard/tutors/${id}`)
       } else {
+        const pwd = typeof values.password === 'string' ? values.password.trim() : ''
         await create.mutateAsync({
           email: values.email,
-          password: values.password,
+          ...(pwd ? { password: pwd } : {}),
           full_name: values.full_name,
           tutor_code: values.tutor_code,
           discipline: values.discipline,
@@ -69,8 +70,23 @@ export default function TutorFormPage() {
               <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
                 <Input placeholder="Enter tutor email" />
               </Form.Item>
-              <Form.Item name="password" label="Password" rules={[{ required: true, min: 8 }]}>
-                <Input.Password placeholder="Create a temporary password" />
+              <Form.Item
+                name="password"
+                label="Password"
+                extra="If this person was already added under Admin Console → Users (tutor), leave blank to keep their current password, or enter a new one (min. 8 characters) to reset it."
+                rules={[
+                  {
+                    validator: async (_, value) => {
+                      const v = typeof value === 'string' ? value.trim() : ''
+                      if (!v) return
+                      if (v.length < 8) {
+                        throw new Error('Password must be at least 8 characters')
+                      }
+                    },
+                  },
+                ]}
+              >
+                <Input.Password placeholder="Optional when user already exists in Admin Console" />
               </Form.Item>
               <Form.Item name="tutor_code" label="Tutor code" rules={[{ required: true }]}>
                 <Input placeholder="e.g. TUT2001" />

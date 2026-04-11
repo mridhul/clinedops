@@ -30,8 +30,8 @@ export default function TutorsListPage() {
 
   return (
     <>
-      <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <Typography.Title level={3} style={{ margin: 0 }}>
+      <Space style={{ marginBottom: 24, width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+        <Typography.Title level={2} style={{ margin: 0 }} className="!font-manrope">
           Tutors
         </Typography.Title>
         <Space wrap>

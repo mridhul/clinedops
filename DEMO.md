@@ -22,6 +22,7 @@ docker compose exec backend python -m app.scripts.seed --reset
 | **Tutor** (Medical Tutor) | `tutor.medicine.0@nuhs.edu.sg` | Log teaching sessions, view student stats (0-4). |
 | **Student** (Medical Student) | `student.0@nus.edu.sg` | View postings, fill surveys (0-49). |
 
+Mridhul@slashllm.com q1w2e3r4t5
 ---
 
 ## 1. Introduction (1 min)

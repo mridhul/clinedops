@@ -49,6 +49,7 @@ export type StudentDetail = {
 
 export type TutorListItem = {
   id: string
+  user_id: string
   tutor_code: string
   email: string
   full_name: string | null
@@ -67,6 +68,7 @@ export type TutorListResponse = {
 
 export type TutorDetail = {
   id: string
+  user_id: string
   tutor_code: string
   email: string
   full_name: string | null

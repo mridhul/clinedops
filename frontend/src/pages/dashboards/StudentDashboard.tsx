@@ -41,10 +41,15 @@ export default function StudentDashboard() {
       error={null}
       isEmpty={!data}
     >
-      <Title level={2}>Student Dashboard</Title>
-      
-      <Row gutter={[16, 16]}>
-        <Col xs={24} lg={16}>
+      <div className="cd-section-lg">
+        <Title level={2} className="!mb-2 font-manrope">Student Dashboard</Title>
+        <Text type="secondary" className="text-sm block max-w-2xl">
+          Your posting, surveys, and teaching sessions in one place.
+        </Text>
+      </div>
+
+      <Row gutter={[24, 24]}>
+        <Col xs={24} lg={14}>
           <Card 
             title={<Space><ThunderboltOutlined /> Active Posting</Space>} 
             bordered={false} 
@@ -57,7 +62,7 @@ export default function StudentDashboard() {
                 <Text type="secondary">{posting.start_date} — {posting.end_date}</Text>
                 <div style={{ marginTop: 20 }}>
                   <Text strong>Rotation Progress</Text>
-                  <Progress percent={45} status="active" strokeColor="#0055ff" />
+                  <Progress percent={45} status="active" strokeColor="var(--cd-primary)" />
                 </div>
                 <Button type="primary" style={{ marginTop: 20 }} block onClick={() => navigate('/dashboard/postings')}>
                   View Posting Details
@@ -69,25 +74,34 @@ export default function StudentDashboard() {
           </Card>
         </Col>
 
-        <Col xs={24} lg={8}>
-          <Card bordered={false} className="glass-card" style={{ height: '100%' }}>
+        <Col xs={24} lg={10}>
+          <Card bordered={false} className="glass-card shadow-premium" style={{ height: '100%' }}>
             <Statistic
               title={<Space><CarryOutOutlined /> Pending Surveys</Space>}
               value={studentData?.pending_surveys_count || 0}
-              valueStyle={{ color: (studentData?.pending_surveys_count || 0) > 0 ? '#faad14' : '#52c41a' }}
+              valueStyle={{
+                color:
+                  (studentData?.pending_surveys_count || 0) > 0 ? 'var(--cd-secondary)' : 'var(--cd-on-tertiary-container)',
+              }}
             />
             <Button 
                 type="link" 
                 icon={<RightOutlined />} 
                 style={{ marginTop: 10, padding: 0 }}
-                onClick={() => navigate('/surveys/pending')}
+                onClick={() => navigate('/dashboard/surveys/pending')}
             >
               Take Action
             </Button>
           </Card>
           
-          <Card bordered={false} className="glass-card" style={{ marginTop: 16, background: 'var(--cd-primary-container-light, #eef2ff)' }}>
-            <Title level={5} style={{ margin: 0 }}>Clinical Exposure</Title>
+          <Card
+            bordered={false}
+            className="glass-card mt-4"
+            style={{ background: 'var(--cd-tertiary-container)', border: 'none' }}
+          >
+            <Title level={5} style={{ margin: 0, color: 'var(--cd-on-tertiary-container)' }}>
+              Clinical exposure
+            </Title>
             <Text type="secondary" style={{ fontSize: 12 }}>Boost your portfolio with job shadowing.</Text>
             <Button 
               type="primary" 

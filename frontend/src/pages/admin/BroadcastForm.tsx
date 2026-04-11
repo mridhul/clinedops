@@ -90,11 +90,11 @@ export default function BroadcastForm() {
   }
 
   return (
-    <div style={{ padding: 24, maxWidth: 900, margin: '0 auto' }}>
+    <div className="max-w-[900px] mx-auto px-2 md:px-0">
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <div>
-          <Title level={2} style={{ margin: 0 }}>
-            Admin Broadcasts
+        <div className="cd-section-lg">
+          <Title level={2} style={{ margin: 0 }} className="font-manrope">
+            Admin broadcasts
           </Title>
           <Text type="secondary">
             Send in-app announcements to student or tutor groups. Only super admins can send. Recipients are all
@@ -102,7 +102,7 @@ export default function BroadcastForm() {
           </Text>
         </div>
 
-        <Card>
+        <Card bordered={false} className="glass-card shadow-premium">
           <Form<FormValues>
             form={form}
             layout="vertical"

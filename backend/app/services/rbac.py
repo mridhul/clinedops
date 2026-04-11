@@ -14,17 +14,19 @@ T = TypeVar("T", bound=tuple[object, ...])
 
 def discipline_scope_for_user(user: User) -> Optional[str]:
     """Return discipline scope for RBAC filtering (None means unrestricted)."""
-    if user.role == RoleEnum.super_admin.value:
+    r = user.role.value if hasattr(user.role, "value") else str(user.role)
+    if r == RoleEnum.super_admin.value:
         return None
-    # Programme admins, supervisors and tutors are scoped to their discipline.
-    if user.role in {
+    # Supervisors (HOD / department heads): cross-discipline visibility for approvals,
+    # teaching sessions, tutor lists, and related reads — aligned with hospital-wide oversight.
+    if r == RoleEnum.supervisor.value:
+        return None
+    if r in {
         RoleEnum.programme_admin.value,
-        RoleEnum.supervisor.value,
         RoleEnum.tutor.value,
     }:
         return user.discipline
-    # Students are effectively scoped to themselves; discipline scope can be used as a fallback.
-    if user.role == RoleEnum.student.value:
+    if r == RoleEnum.student.value:
         return user.discipline
     return user.discipline
 

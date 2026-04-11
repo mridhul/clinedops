@@ -7,7 +7,7 @@ from typing import Any, Optional, List
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select, and_, or_
+from sqlalchemy import cast, func, select, and_, or_, String
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
@@ -28,8 +28,9 @@ from app.schemas.surveys import (
     SurveySubmissionCreate,
     ManualSurveyAssignmentCreate,
     TutorFeedbackSummary,
-    CompletionRateSchema
+    CompletionRateSchema,
 )
+from app.services.access import role_value
 from app.services.audit_service import record_audit
 
 class SurveyService:
@@ -126,6 +127,32 @@ class SurveyService:
     async def submit_survey(session: AsyncSession, actor: User, payload: SurveySubmissionCreate) -> SurveySubmission:
         template = await SurveyService.get_template(session, payload.template_id)
         
+        # Resolve student_id more robustly
+        student_id = payload.student_id
+        if role_value(actor) == RoleEnum.student.value:
+            student_stmt = select(Student).where(Student.user_id == actor.id)
+            student = (await session.execute(student_stmt)).scalar_one_or_none()
+            if not student:
+                raise HTTPException(status_code=400, detail="Student profile not found for current user")
+            # Override or use student profile id
+            student_id = student.id
+        
+        if not student_id:
+            raise HTTPException(status_code=400, detail="student_id is required")
+
+        assignment_for_complete: Optional[SurveyAssignment] = None
+        if payload.assignment_id:
+            assignment_for_complete = await session.get(SurveyAssignment, payload.assignment_id)
+
+        teaching_session_id = payload.teaching_session_id
+        if assignment_for_complete and teaching_session_id is None:
+            if assignment_for_complete.session_ids and len(assignment_for_complete.session_ids) == 1:
+                only_sid = assignment_for_complete.session_ids[0]
+                try:
+                    teaching_session_id = only_sid if isinstance(only_sid, UUID) else UUID(str(only_sid))
+                except (ValueError, TypeError):
+                    teaching_session_id = None
+
         # Calculate scores
         total_score = Decimal(0)
         score_count = 0
@@ -148,8 +175,8 @@ class SurveyService:
         submission = SurveySubmission(
             assignment_id=payload.assignment_id,
             template_id=payload.template_id,
-            teaching_session_id=payload.teaching_session_id,
-            student_id=payload.student_id,
+            teaching_session_id=teaching_session_id,
+            student_id=student_id,
             responses=payload.responses,
             overall_score=overall_score,
             has_low_scores=has_low_scores,
@@ -157,12 +184,10 @@ class SurveyService:
             created_by=actor.id
         )
         session.add(submission)
-        
-        if payload.assignment_id:
-            assignment = await session.get(SurveyAssignment, payload.assignment_id)
-            if assignment:
-                assignment.status = SurveyStatusEnum.completed.value
-        
+
+        if assignment_for_complete:
+            assignment_for_complete.status = SurveyStatusEnum.completed.value
+
         await session.flush()
         
         await record_audit(
@@ -277,21 +302,86 @@ class SurveyService:
         return created_count
 
     @staticmethod
+    def _submission_comment_snippet(responses: dict[str, Any]) -> str:
+        if not responses:
+            return "No comment"
+        if isinstance(responses.get("comment"), str) and responses["comment"].strip():
+            return responses["comment"].strip()
+        for _k, v in responses.items():
+            if isinstance(v, str) and len(v.strip()) > 20:
+                return v.strip()[:500]
+        return "No comment"
+
+    @staticmethod
     async def get_tutor_feedback_summary(session: AsyncSession, tutor_id: UUID) -> TutorFeedbackSummary:
-        # Find all submissions where this tutor was involved
-        # This involves checking SurveyAssignment.tutor_ids JSONB list
-        # or checking the linked session's tutor_id.
-        
-        # For simplicity, we'll query SurveySubmission and join Assignment
-        # and filter assignments that contain this tutor_id.
-        
-        # Since tutor_ids is a JSONB list, we use containment
-        stmt = select(SurveySubmission).join(SurveyAssignment).where(
-            SurveyAssignment.tutor_ids.contains([str(tutor_id)]),
-            SurveySubmission.status == "submitted"
+        """Aggregate submissions for a tutor via assignment.tutor_ids, assignment.session_ids → TeachingSession, or submission.teaching_session_id."""
+        tid_s = str(tutor_id)
+
+        # 1) Direct link: submission → teaching session taught by this tutor
+        direct_stmt = (
+            select(SurveySubmission)
+            .join(TeachingSession, SurveySubmission.teaching_session_id == TeachingSession.id)
+            .where(
+                SurveySubmission.status == "submitted",
+                TeachingSession.tutor_id == tutor_id,
+            )
         )
-        submissions = (await session.execute(stmt)).scalars().all()
-        
+        direct_subs = list((await session.execute(direct_stmt)).scalars().all())
+
+        # 2) Via assignment: prefilter rows that might reference this tutor (JSON text or linked sessions)
+        assign_stmt = (
+            select(SurveySubmission, SurveyAssignment)
+            .join(SurveyAssignment, SurveySubmission.assignment_id == SurveyAssignment.id)
+            .where(
+                SurveySubmission.status == "submitted",
+                or_(
+                    cast(SurveyAssignment.tutor_ids, String).contains(tid_s),
+                    func.coalesce(func.jsonb_array_length(SurveyAssignment.session_ids), 0) > 0,
+                ),
+            )
+        )
+        assign_rows = (await session.execute(assign_stmt)).all()
+
+        session_ids_need: set[UUID] = set()
+        for _sub, assign in assign_rows:
+            for sid in assign.session_ids or []:
+                try:
+                    session_ids_need.add(sid if isinstance(sid, UUID) else UUID(str(sid)))
+                except (ValueError, TypeError):
+                    continue
+
+        tutor_by_session: dict[UUID, UUID] = {}
+        if session_ids_need:
+            ts_rows = (
+                await session.execute(
+                    select(TeachingSession.id, TeachingSession.tutor_id).where(
+                        TeachingSession.id.in_(session_ids_need)
+                    )
+                )
+            ).all()
+            tutor_by_session = {row[0]: row[1] for row in ts_rows}
+
+        by_id: dict[UUID, SurveySubmission] = {s.id: s for s in direct_subs}
+
+        for sub, assign in assign_rows:
+            matched = False
+            tids = assign.tutor_ids or []
+            if tids and tid_s in {str(x) for x in tids}:
+                matched = True
+            if not matched and assign.session_ids:
+                for sid in assign.session_ids:
+                    try:
+                        su = sid if isinstance(sid, UUID) else UUID(str(sid))
+                    except (ValueError, TypeError):
+                        continue
+                    if tutor_by_session.get(su) == tutor_id:
+                        matched = True
+                        break
+            if matched:
+                by_id[sub.id] = sub
+
+        submissions = sorted(by_id.values(), key=lambda s: s.created_at)
+
         if not submissions:
             return TutorFeedbackSummary(
                 tutor_id=tutor_id,
@@ -299,31 +389,43 @@ class SurveyService:
                 total_responses=0,
                 low_score_count=0,
                 trends=[],
-                recent_comments=[]
+                recent_comments=[],
             )
-            
+
         total_score = sum((s.overall_score or 0) for s in submissions)
         low_score_count = sum(1 for s in submissions if s.has_low_scores)
-        
-        # Trends: group by date
-        # (This would be more complex in SQL, doing it in Python for now)
-        trends_map = {}
+
+        trends_map: dict[str, list[float]] = {}
         for s in submissions:
             date_key = s.created_at.date().isoformat()
-            if date_key not in trends_map:
-                trends_map[date_key] = []
-            trends_map[date_key].append(float(s.overall_score or 0))
-            
+            trends_map.setdefault(date_key, []).append(float(s.overall_score or 0))
+
         trends = [
-            {"date": d, "score": sum(scores)/len(scores)}
+            {"date": d, "score": sum(scores) / len(scores)}
             for d, scores in sorted(trends_map.items())
         ]
-        
+
         return TutorFeedbackSummary(
             tutor_id=tutor_id,
             average_score=Decimal(str(total_score / len(submissions))),
             total_responses=len(submissions),
             low_score_count=low_score_count,
             trends=trends,
-            recent_comments=[s.responses.get('comment', 'No comment') for s in submissions[-5:]]
+            recent_comments=[
+                SurveyService._submission_comment_snippet(s.responses or {}) for s in submissions[-5:]
+            ],
         )
+
+    @staticmethod
+    async def list_my_submissions(session: AsyncSession, actor: User) -> list[SurveySubmission]:
+        if role_value(actor) != RoleEnum.student.value:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Students only")
+        st = (await session.execute(select(Student).where(Student.user_id == actor.id))).scalar_one_or_none()
+        if st is None:
+            raise HTTPException(status_code=400, detail="Student profile not found")
+        stmt = (
+            select(SurveySubmission)
+            .where(SurveySubmission.student_id == st.id, SurveySubmission.status == "submitted")
+            .order_by(SurveySubmission.created_at.desc())
+        )
+        return list((await session.execute(stmt)).scalars().all())

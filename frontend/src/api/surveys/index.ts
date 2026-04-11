@@ -36,10 +36,18 @@ export function useTutorFeedback(accessToken: string | null, tutorId: string | u
   })
 }
 
-export function useMyTutorFeedback(accessToken: string | null) {
+export function useMyTutorFeedback(accessToken: string | null, queryEnabled = true) {
   return useQuery({
     queryKey: ['surveys', 'feedback', 'me', accessToken],
     queryFn: () => apiFetch<TutorFeedbackSummary>('/my/feedback', { accessToken }),
+    enabled: Boolean(accessToken) && queryEnabled,
+  })
+}
+
+export function useMySurveySubmissions(accessToken: string | null) {
+  return useQuery({
+    queryKey: ['surveys', 'submissions', 'me', accessToken],
+    queryFn: () => apiFetch<SurveySubmission[]>('/submissions/me', { accessToken }),
     enabled: Boolean(accessToken),
   })
 }
@@ -56,6 +64,7 @@ export function useSubmitSurvey(accessToken: string | null) {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['surveys', 'assignments'] })
       void qc.invalidateQueries({ queryKey: ['surveys', 'feedback'] })
+      void qc.invalidateQueries({ queryKey: ['surveys', 'submissions', 'me'] })
     },
   })
 }

@@ -52,7 +52,7 @@ const PageState: React.FC<PageStateProps> = ({
         {skeletonType === 'cards' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 6].map(i => (
-              <div key={i} className="p-4 border border-gray-100 rounded-xl bg-white/50 backdrop-blur-sm shadow-sm">
+              <div key={i} className="glass-card p-4 rounded-lg">
                 <Skeleton active paragraph={{ rows: 3 }} />
               </div>
             ))}
@@ -91,7 +91,7 @@ const PageState: React.FC<PageStateProps> = ({
           }
         >
           {onRetry && (
-            <Button type="primary" onClick={onRetry} className="rounded-lg shadow-sm border-none bg-indigo-600 hover:bg-indigo-700">
+            <Button type="primary" onClick={onRetry} size="large" className="rounded-md">
               Refresh Data
             </Button>
           )}
