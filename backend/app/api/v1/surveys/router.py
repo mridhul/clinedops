@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.api.v1.deps import get_current_user, require_roles
+from app.api.v1.deps import get_current_user, has_permission, require_roles
 from app.db.models import User
 from app.db.models.enums import RoleEnum
 from app.db.session import get_db_session
@@ -34,7 +34,7 @@ router = APIRouter(tags=["surveys"])
 async def create_template(
     payload: SurveyTemplateCreate,
     db: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(require_roles([RoleEnum.super_admin, RoleEnum.programme_admin]))
+    actor: User = Depends(has_permission("manage_surveys"))
 ) -> Envelope[SurveyTemplateRead]:
     template = await SurveyService.create_template(db, actor=actor, payload=payload)
     return Envelope(data=SurveyTemplateRead.model_validate(template))
@@ -62,7 +62,7 @@ async def update_template(
     template_id: UUID,
     payload: SurveyTemplateUpdate,
     db: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(require_roles([RoleEnum.super_admin, RoleEnum.programme_admin]))
+    actor: User = Depends(has_permission("manage_surveys"))
 ) -> Envelope[SurveyTemplateRead]:
     template = await SurveyService.update_template(db, actor=actor, template_id=template_id, payload=payload)
     return Envelope(data=SurveyTemplateRead.model_validate(template))
@@ -71,7 +71,7 @@ async def update_template(
 async def delete_template(
     template_id: UUID,
     db: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(require_roles([RoleEnum.super_admin, RoleEnum.programme_admin]))
+    actor: User = Depends(has_permission("manage_surveys"))
 ) -> Envelope[bool]:
     success = await SurveyService.delete_template(db, actor=actor, template_id=template_id)
     return Envelope(data=success)
@@ -81,7 +81,7 @@ async def delete_template(
 @router.post("/assignments/batch", response_model=Envelope[int])
 async def batch_assign_surveys(
     db: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(require_roles([RoleEnum.super_admin, RoleEnum.programme_admin]))
+    actor: User = Depends(has_permission("manage_surveys"))
 ) -> Envelope[int]:
     count = await SurveyService.batch_sessions_into_assignments(db)
     return Envelope(data=count)
@@ -90,10 +90,11 @@ async def batch_assign_surveys(
 async def manual_assign_surveys(
     payload: ManualSurveyAssignmentCreate,
     db: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(require_roles([RoleEnum.super_admin, RoleEnum.programme_admin]))
+    actor: User = Depends(has_permission("manage_surveys"))
 ) -> Envelope[int]:
     count = await SurveyService.manual_assign_surveys(db, actor=actor, payload=payload)
     return Envelope(data=count)
+
 
 @router.get("/assignments", response_model=Envelope[List[SurveyAssignmentRead]])
 async def list_student_assignments(

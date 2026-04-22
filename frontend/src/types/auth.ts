@@ -10,5 +10,7 @@ export type MeResponse = {
   profile_photo_url: string | null
   role: Role
   discipline: Discipline | null
+  permissions: string[]
 }
+
 

@@ -28,11 +28,13 @@ const Sidebar: React.FC = () => {
 
   const isTutor = profile?.role === 'tutor';
   const isStudent = profile?.role === 'student';
-  const isAdmin = profile?.role === 'super_admin' || profile?.role === 'programme_admin';
   const isSuperAdmin = profile?.role === 'super_admin';
   const isSupervisor = profile?.role === 'supervisor';
-  const canSeeSessions = isTutor || isSupervisor || isAdmin;
-  const canSeeReports = isSupervisor || isAdmin;
+
+  const hasPermission = (perm: string) => profile?.role === 'super_admin' || profile?.permissions?.includes(perm);
+
+  const canSeeSessions = isTutor || isSupervisor || hasPermission('view_students') || hasPermission('view_tutors');
+  const canSeeReports = hasPermission('view_reports');
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Overview', href: '/dashboard', show: true },
@@ -56,10 +58,10 @@ const Sidebar: React.FC = () => {
       href: isStudent ? '/dashboard/surveys/pending' : '/dashboard/surveys/analytics', 
       show: true 
     },
-    { icon: LayoutDashboard, label: 'Templates', href: '/dashboard/surveys/templates', show: isAdmin },
-    { icon: Users, label: 'User Management', href: '/dashboard/students', show: isAdmin },
+    { icon: LayoutDashboard, label: 'Templates', href: '/dashboard/surveys/templates', show: hasPermission('manage_surveys') },
+    { icon: Users, label: 'User Management', href: '/dashboard/students', show: hasPermission('view_students') },
     { icon: BarChart3, label: 'Reports', href: '/dashboard/reports', show: canSeeReports },
-    { icon: Shield, label: 'Admin Console', href: '/dashboard/admin', show: isSuperAdmin },
+    { icon: Shield, label: 'Admin Console', href: '/dashboard/admin', show: hasPermission('manage_settings') },
     {
       icon: Megaphone,
       label: 'Broadcasts',
@@ -67,6 +69,7 @@ const Sidebar: React.FC = () => {
       show: isSuperAdmin,
     },
   ];
+
 
   return (
     <>

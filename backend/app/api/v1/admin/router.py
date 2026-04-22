@@ -2,9 +2,11 @@ import csv
 import io
 from fastapi import APIRouter, Depends, Response
 from typing import Sequence, Optional
+from datetime import datetime
+
 from uuid import UUID
 
-from app.api.v1.deps import current_active_user, permission_dependency, get_db
+from app.api.v1.deps import current_active_user, has_permission, get_db
 from app.api.v1.admin.schemas import (
     AuditLogOut,
     UserOut,
@@ -26,7 +28,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 router = APIRouter(
     prefix="/admin",
     tags=["admin"],
-    dependencies=[Depends(permission_dependency([RoleEnum.super_admin]))]
 )
 
 def get_admin_service(db: AsyncSession = Depends(get_db)):
@@ -38,6 +39,7 @@ async def list_users(
     skip: int = 0,
     limit: int = 50,
     role: Optional[str] = None,
+    current_user: UserModel = Depends(has_permission("view_tutors")),
     service: AdminService = Depends(get_admin_service),
 ):
     users, total = await service.get_users(skip=skip, limit=limit, role=role)
@@ -47,7 +49,7 @@ async def list_users(
 @router.post("/users", response_model=Envelope[UserOut])
 async def create_user(
     payload: UserCreate,
-    current_user: UserModel = Depends(current_active_user),
+    current_user: UserModel = Depends(has_permission("edit_tutors")),
     service: AdminService = Depends(get_admin_service),
 ):
     user = await service.create_user(payload=payload, creator_id=current_user.id)
@@ -60,20 +62,42 @@ async def list_audit_logs(
     limit: int = 50,
     action: Optional[str] = None,
     actor_id: Optional[UUID] = None,
+    date_from: Optional[datetime] = None,
+    date_to: Optional[datetime] = None,
+    current_user: UserModel = Depends(has_permission("view_reports")),
     service: AdminService = Depends(get_admin_service),
 ):
-    logs, total = await service.get_audit_logs(skip=skip, limit=limit, action=action, actor_id=actor_id)
+    logs, total = await service.get_audit_logs(
+        skip=skip, 
+        limit=limit, 
+        action=action, 
+        actor_id=actor_id,
+        date_from=date_from,
+        date_to=date_to
+    )
     return Envelope(data=logs, meta={"total": total, "skip": skip, "limit": limit})
+
 
 
 @router.get("/audit-logs/export")
 async def export_audit_logs_csv(
     action: Optional[str] = None,
     actor_id: Optional[UUID] = None,
+    date_from: Optional[datetime] = None,
+    date_to: Optional[datetime] = None,
+    current_user: UserModel = Depends(has_permission("view_reports")),
     service: AdminService = Depends(get_admin_service),
 ):
-    # Fetch a large amount for export
-    logs, _ = await service.get_audit_logs(skip=0, limit=10000, action=action, actor_id=actor_id)
+    # Fetch for export with current filters
+    logs, _ = await service.get_audit_logs(
+        skip=0, 
+        limit=10000, 
+        action=action, 
+        actor_id=actor_id,
+        date_from=date_from,
+        date_to=date_to
+    )
+
     
     output = io.StringIO()
     writer = csv.writer(output)
@@ -95,6 +119,7 @@ async def export_audit_logs_csv(
 
 @router.get("/settings", response_model=Envelope[list[SystemSettingsOut]])
 async def list_system_settings(
+    current_user: UserModel = Depends(has_permission("manage_settings")),
     service: AdminService = Depends(get_admin_service),
 ):
     settings = await service.get_system_settings()
@@ -105,7 +130,7 @@ async def list_system_settings(
 async def update_system_setting(
     key: str,
     payload: SystemSettingsUpdate,
-    user: UserModel = Depends(permission_dependency([RoleEnum.super_admin])),
+    user: UserModel = Depends(has_permission("manage_settings")),
     service: AdminService = Depends(get_admin_service),
 ):
     setting = await service.update_system_setting(key, payload.setting_value, user.id)
@@ -114,6 +139,7 @@ async def update_system_setting(
 
 @router.get("/rbac", response_model=Envelope[list[RolePermissionOut]])
 async def list_role_permissions(
+    current_user: UserModel = Depends(has_permission("manage_settings")),
     service: AdminService = Depends(get_admin_service),
 ):
     rbac = await service.get_role_permissions()
@@ -124,7 +150,7 @@ async def list_role_permissions(
 async def update_role_permissions(
     role: str,
     payload: RolePermissionUpdate,
-    user: UserModel = Depends(permission_dependency([RoleEnum.super_admin])),
+    user: UserModel = Depends(has_permission("manage_settings")),
     service: AdminService = Depends(get_admin_service),
 ):
     rp = await service.update_role_permissions(role, payload.permissions, user.id)
@@ -135,7 +161,9 @@ async def update_role_permissions(
 async def list_imports(
     skip: int = 0,
     limit: int = 5,
+    current_user: UserModel = Depends(has_permission("view_reports")),
     service: AdminService = Depends(get_admin_service),
 ):
     imports, total = await service.get_import_history(skip=skip, limit=limit)
     return Envelope(data=imports, meta={"total": total, "skip": skip, "limit": limit})
+

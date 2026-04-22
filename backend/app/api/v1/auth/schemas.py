@@ -28,6 +28,8 @@ class MeResponse(BaseModel):
     profile_photo_url: Optional[str] = None
     role: RoleEnum
     discipline: Optional[DisciplineEnum] = None
+    permissions: list[str] = []
+
 
 class ProfileUpdate(BaseModel):
     full_name: Optional[str] = Field(None, max_length=255)
