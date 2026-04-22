@@ -9,6 +9,8 @@ from app.db.models.user import User
 from app.api.v1.admin.schemas import UserCreate
 from app.core.security import hash_password
 from fastapi import HTTPException
+from datetime import datetime
+from app.services.audit_service import record_audit
 
 
 class AdminService:
@@ -31,8 +33,21 @@ class AdminService:
             created_by=creator_id,
         )
         self.db.add(user)
+        await self.db.flush()
+        
+        await record_audit(
+            self.db,
+            actor_id=creator_id,
+            action="CREATE_USER",
+            entity_type="user",
+            entity_id=user.id,
+            before_state=None,
+            after_state={"email": user.email, "role": user.role}
+        )
+        
         await self.db.commit()
         await self.db.refresh(user)
+
         return user
 
     async def get_users(self, skip: int = 0, limit: int = 50, role: Optional[str] = None) -> tuple[Sequence[User], int]:
@@ -51,13 +66,24 @@ class AdminService:
         return users, total
 
     async def get_audit_logs(
-        self, skip: int = 0, limit: int = 50, actor_id: Optional[UUID] = None, action: Optional[str] = None
+        self, 
+        skip: int = 0, 
+        limit: int = 50, 
+        actor_id: Optional[UUID] = None, 
+        action: Optional[str] = None,
+        date_from: Optional[datetime] = None,
+        date_to: Optional[datetime] = None
     ) -> tuple[Sequence[AuditLog], int]:
         query = select(AuditLog)
         if actor_id:
             query = query.where(AuditLog.created_by == actor_id)
         if action:
-            query = query.where(AuditLog.action == action)
+            query = query.where(AuditLog.action.ilike(f"%{action}%"))
+        if date_from:
+            query = query.where(AuditLog.created_at >= date_from)
+        if date_to:
+            query = query.where(AuditLog.created_at <= date_to)
+
             
         count_stmt = select(func.count()).select_from(query.subquery())
         total = await self.db.scalar(count_stmt) or 0
@@ -78,9 +104,22 @@ class AdminService:
             setting = SystemSettings(setting_key=key, setting_value=value, updated_by=user_id)
             self.db.add(setting)
         else:
+            before_state = {"setting_value": setting.setting_value}
             setting.setting_value = value
             setting.updated_by = user_id
+            
+            await record_audit(
+                self.db,
+                actor_id=user_id,
+                action="UPDATE_SETTING",
+                entity_type="system_setting",
+                entity_id=setting.id,
+                before_state=before_state,
+                after_state={"setting_value": value, "key": key}
+            )
+            
         await self.db.commit()
+
         await self.db.refresh(setting)
         return setting
 
@@ -88,16 +127,35 @@ class AdminService:
         result = await self.db.execute(select(RolePermission))
         return result.scalars().all()
 
+    async def get_permissions_for_role(self, role: str) -> list[str]:
+        result = await self.db.execute(select(RolePermission).where(RolePermission.role == role))
+        rp = result.scalars().first()
+        return rp.permissions if rp else []
+
     async def update_role_permissions(self, role: str, permissions: list[str], user_id: UUID) -> RolePermission:
+
         result = await self.db.execute(select(RolePermission).where(RolePermission.role == role))
         rp = result.scalars().first()
         if not rp:
             rp = RolePermission(role=role, permissions=permissions, updated_by=user_id)
             self.db.add(rp)
         else:
+            before_state = {"permissions": rp.permissions}
             rp.permissions = permissions
             rp.updated_by = user_id
+            
+            await record_audit(
+                self.db,
+                actor_id=user_id,
+                action="UPDATE_RBAC",
+                entity_type="role_permission",
+                entity_id=rp.id,
+                before_state=before_state,
+                after_state={"permissions": permissions, "role": role}
+            )
+            
         await self.db.commit()
+
         await self.db.refresh(rp)
         return rp
 

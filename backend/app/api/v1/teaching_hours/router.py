@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.v1.deps import get_current_user, require_roles
+from app.api.v1.deps import get_current_user, has_permission, require_roles
 from app.api.v1.teaching_hours.schemas import (
     BulkSessionCreate,
     DashboardOut,
@@ -116,9 +116,7 @@ async def submit_session(
 async def approve_session(
     session_id: UUID,
     db: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(
-        require_roles([RoleEnum.supervisor, RoleEnum.programme_admin, RoleEnum.super_admin])
-    ),
+    actor: User = Depends(has_permission("approve_hours")),
 ) -> Envelope[SessionOut]:
     out = await teaching_hours_service.approve_session(db, actor=actor, session_id=session_id)
     return Envelope(data=out, meta=None, errors=None)
@@ -129,9 +127,7 @@ async def reject_session(
     session_id: UUID,
     payload: SessionRejectPayload,
     db: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(
-        require_roles([RoleEnum.supervisor, RoleEnum.programme_admin, RoleEnum.super_admin])
-    ),
+    actor: User = Depends(has_permission("approve_hours")),
 ) -> Envelope[SessionOut]:
     out = await teaching_hours_service.reject_session(db, actor=actor, session_id=session_id, reason=payload.reason)
     return Envelope(data=out, meta=None, errors=None)
@@ -157,9 +153,7 @@ async def dashboard(
     date_from: Optional[date] = Query(None),
     date_to: Optional[date] = Query(None),
     db: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(
-        require_roles([RoleEnum.super_admin, RoleEnum.programme_admin, RoleEnum.supervisor])
-    ),
+    actor: User = Depends(has_permission("view_reports")),
 ) -> Envelope[DashboardOut]:
     out = await teaching_hours_service.get_dashboard_data(
         db,
@@ -180,9 +174,7 @@ async def export_hours(
     date_from: Optional[date] = Query(None),
     date_to: Optional[date] = Query(None),
     db: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(
-        require_roles([RoleEnum.super_admin, RoleEnum.programme_admin])
-    ),
+    actor: User = Depends(has_permission("view_reports")),
 ) -> StreamingResponse:
     import io
     xlsx_bytes = await teaching_hours_service.export_approved_hours_xlsx(
@@ -206,9 +198,7 @@ async def export_hours(
 async def list_billable_rates(
     tutor_id: UUID,
     db: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(
-        require_roles([RoleEnum.super_admin, RoleEnum.programme_admin])
-    ),
+    actor: User = Depends(has_permission("view_tutors")),
 ) -> Envelope[list[TutorBillableRateOut]]:
     out = await teaching_hours_service.list_billable_rates(db, actor=actor, tutor_id=tutor_id)
     return Envelope(data=out, meta={"total": len(out)}, errors=None)
@@ -219,9 +209,8 @@ async def create_billable_rate(
     tutor_id: UUID,
     payload: TutorBillableRateCreate,
     db: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(
-        require_roles([RoleEnum.super_admin, RoleEnum.programme_admin])
-    ),
+    actor: User = Depends(has_permission("edit_tutors")),
 ) -> Envelope[TutorBillableRateOut]:
     out = await teaching_hours_service.create_billable_rate(db, actor=actor, tutor_id=tutor_id, payload=payload)
     return Envelope(data=out, meta=None, errors=None)
+

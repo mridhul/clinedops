@@ -69,3 +69,11 @@ async def client(app) -> AsyncIterator[AsyncClient]:
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
+
+@pytest.fixture
+async def db() -> AsyncIterator[AsyncSession]:
+    from app.db.session import get_sessionmaker
+    session_factory = get_sessionmaker()
+    async with session_factory() as session:
+        yield session
+

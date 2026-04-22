@@ -129,7 +129,12 @@ async def refresh(
 @router.get("/me", response_model=Envelope[MeResponse])
 async def me(
     user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_session),
 ) -> Envelope[MeResponse]:
+    from app.services.admin_service import AdminService
+    service = AdminService(session)
+    permissions = await service.get_permissions_for_role(user.role)
+    
     return Envelope(
         data=MeResponse(
             id=user.id,
@@ -139,6 +144,7 @@ async def me(
             profile_photo_url=user.profile_photo_url,
             role=RoleEnum(user.role),
             discipline=DisciplineEnum(user.discipline) if user.discipline else None,
+            permissions=permissions,
         ),
         meta=None,
         errors=None,
@@ -160,6 +166,10 @@ async def update_me(
     await session.commit()
     await session.refresh(user)
 
+    from app.services.admin_service import AdminService
+    service = AdminService(session)
+    permissions = await service.get_permissions_for_role(user.role)
+
     return Envelope(
         data=MeResponse(
             id=user.id,
@@ -169,6 +179,7 @@ async def update_me(
             profile_photo_url=user.profile_photo_url,
             role=RoleEnum(user.role),
             discipline=DisciplineEnum(user.discipline) if user.discipline else None,
+            permissions=permissions,
         )
     )
 
@@ -204,6 +215,10 @@ async def upload_profile_photo(
     await session.commit()
     await session.refresh(user)
 
+    from app.services.admin_service import AdminService
+    service = AdminService(session)
+    permissions = await service.get_permissions_for_role(user.role)
+
     return Envelope(
         data=MeResponse(
             id=user.id,
@@ -213,8 +228,10 @@ async def upload_profile_photo(
             profile_photo_url=user.profile_photo_url,
             role=RoleEnum(user.role),
             discipline=DisciplineEnum(user.discipline) if user.discipline else None,
+            permissions=permissions,
         )
     )
+
 
 
 @router.post("/forgot-password", response_model=Envelope[dict])

@@ -6,6 +6,7 @@ import UserManager from './UserManager';
 import RBACEditor from './RBACEditor';
 import SystemSettingsViewer from './SystemSettingsViewer';
 import ImportHistoryViewer from './ImportHistoryViewer';
+import { useAuth } from '@/auth/useAuth';
 
 const { Title, Text } = Typography;
 
@@ -14,6 +15,9 @@ const AdminOverview: React.FC = () => {
     window.innerWidth < 768 ? 'top' : 'left'
   );
 
+  const profile = useAuth((s) => s.profile);
+  const hasPermission = (perm: string) => profile?.role === 'super_admin' || profile?.permissions?.includes(perm);
+
   useEffect(() => {
     const handleResize = () => {
       setTabPosition(window.innerWidth < 768 ? 'top' : 'left');
@@ -21,6 +25,64 @@ const AdminOverview: React.FC = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const items = [
+    {
+      label: (
+        <span className="flex items-center gap-2">
+          <SafetyOutlined />
+          Audit Logs
+        </span>
+      ),
+      key: 'audit',
+      children: <AuditLogViewer />,
+      show: hasPermission('view_reports'),
+    },
+    {
+      label: (
+        <span className="flex items-center gap-2">
+          <UserOutlined />
+          Users
+        </span>
+      ),
+      key: 'users',
+      children: <UserManager />,
+      show: hasPermission('view_students') || hasPermission('view_tutors'),
+    },
+    {
+      label: (
+        <span className="flex items-center gap-2">
+          <SettingOutlined />
+          RBAC Config
+        </span>
+      ),
+      key: 'rbac',
+      children: <RBACEditor />,
+      show: hasPermission('manage_settings'),
+    },
+    {
+      label: (
+        <span className="flex items-center gap-2">
+          <SettingOutlined />
+          System Settings
+        </span>
+      ),
+      key: 'settings',
+      children: <SystemSettingsViewer />,
+      show: hasPermission('manage_settings'),
+    },
+    {
+      label: (
+        <span className="flex items-center gap-2">
+          <HistoryOutlined />
+          Import History
+        </span>
+      ),
+      key: 'imports',
+      children: <ImportHistoryViewer />,
+      show: hasPermission('view_reports'),
+    },
+  ].filter(item => item.show);
 
   return (
     <div className="max-w-[1400px] mx-auto w-full p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -33,61 +95,10 @@ const AdminOverview: React.FC = () => {
 
       <div className="glass-card cd-glass rounded-lg shadow-premium p-4 md:p-6">
         <Tabs
-          defaultActiveKey="audit"
+          defaultActiveKey={items[0]?.key || 'audit'}
           tabPosition={tabPosition}
           className="admin-console-tabs min-h-[500px]"
-          items={[
-            {
-              label: (
-                <span className="flex items-center gap-2">
-                  <SafetyOutlined />
-                  Audit Logs
-                </span>
-              ),
-              key: 'audit',
-              children: <AuditLogViewer />,
-            },
-            {
-              label: (
-                <span className="flex items-center gap-2">
-                  <UserOutlined />
-                  Users
-                </span>
-              ),
-              key: 'users',
-              children: <UserManager />,
-            },
-            {
-              label: (
-                <span className="flex items-center gap-2">
-                  <SettingOutlined />
-                  RBAC Config
-                </span>
-              ),
-              key: 'rbac',
-              children: <RBACEditor />,
-            },
-            {
-              label: (
-                <span className="flex items-center gap-2">
-                  <SettingOutlined />
-                  System Settings
-                </span>
-              ),
-              key: 'settings',
-              children: <SystemSettingsViewer />,
-            },
-            {
-              label: (
-                <span className="flex items-center gap-2">
-                  <HistoryOutlined />
-                  Import History
-                </span>
-              ),
-              key: 'imports',
-              children: <ImportHistoryViewer />,
-            },
-          ]}
+          items={items}
         />
       </div>
     </div>

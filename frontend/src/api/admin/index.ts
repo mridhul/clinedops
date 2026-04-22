@@ -80,18 +80,29 @@ export const useCreateAdminUser = (accessToken: string | null) => {
   });
 };
 
-export const useAdminAuditLogs = (accessToken: string | null, skip = 0, limit = 50, action?: string, actor_id?: string) => {
+export const useAdminAuditLogs = (
+  accessToken: string | null, 
+  skip = 0, 
+  limit = 50, 
+  action?: string, 
+  actor_id?: string,
+  dateFrom?: string,
+  dateTo?: string
+) => {
   return useQuery({
-    queryKey: ["admin_audit_logs", accessToken, { skip, limit, action, actor_id }],
+    queryKey: ["admin_audit_logs", accessToken, { skip, limit, action, actor_id, dateFrom, dateTo }],
     queryFn: () => {
       const qs = new URLSearchParams({ skip: skip.toString(), limit: limit.toString() });
       if (action) qs.append("action", action);
       if (actor_id) qs.append("actor_id", actor_id);
+      if (dateFrom) qs.append("date_from", dateFrom);
+      if (dateTo) qs.append("date_to", dateTo);
       return apiFetch<AuditLog[]>(`/admin/audit-logs?${qs.toString()}`, { accessToken });
     },
     enabled: Boolean(accessToken),
   });
 };
+
 
 export const useAdminSettings = (accessToken: string | null) => {
   return useQuery({

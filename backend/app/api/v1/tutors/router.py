@@ -7,7 +7,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.v1.deps import get_current_user
+from app.api.v1.deps import get_current_user, has_permission
 from app.api.v1.tutors.schemas import TutorCreate, TutorDetail, TutorListResponse, TutorUpdate
 from app.db.models import User
 from app.db.session import get_db_session
@@ -25,7 +25,7 @@ async def list_tutors(
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
     session: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(get_current_user),
+    actor: User = Depends(has_permission("view_tutors")),
 ) -> Envelope[TutorListResponse]:
     data = await tutor_service.list_tutors(
         session,
@@ -47,7 +47,7 @@ async def list_tutors(
 async def create_tutor(
     payload: TutorCreate,
     session: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(get_current_user),
+    actor: User = Depends(has_permission("edit_tutors")),
 ) -> Envelope[TutorDetail]:
     detail = await tutor_service.create_tutor(session, actor=actor, payload=payload)
     return Envelope(data=detail, meta=None, errors=None)
@@ -60,7 +60,7 @@ async def batch_import_tutors(
     dry_run: bool = Form(False),
     default_password: str = Form(...),
     session: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(get_current_user),
+    actor: User = Depends(has_permission("edit_tutors")),
 ) -> Envelope[dict[str, Any]]:
     mapping_dict: dict[str, str] = json.loads(mapping)
     data = await import_batch_service.process_tutor_batch(
@@ -78,7 +78,7 @@ async def batch_import_tutors(
 async def get_tutor(
     tutor_id: UUID,
     session: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(get_current_user),
+    actor: User = Depends(has_permission("view_tutors")),
 ) -> Envelope[TutorDetail]:
     detail = await tutor_service.get_tutor_detail(session, actor=actor, tutor_id=tutor_id)
     return Envelope(data=detail, meta=None, errors=None)
@@ -89,7 +89,7 @@ async def patch_tutor(
     tutor_id: UUID,
     payload: TutorUpdate,
     session: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(get_current_user),
+    actor: User = Depends(has_permission("edit_tutors")),
 ) -> Envelope[TutorDetail]:
     detail = await tutor_service.update_tutor(session, actor=actor, tutor_id=tutor_id, payload=payload)
     return Envelope(data=detail, meta=None, errors=None)
@@ -99,7 +99,8 @@ async def patch_tutor(
 async def delete_tutor(
     tutor_id: UUID,
     session: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(get_current_user),
+    actor: User = Depends(has_permission("edit_tutors")),
 ) -> Envelope[dict]:
     await tutor_service.soft_delete_tutor(session, actor=actor, tutor_id=tutor_id)
     return Envelope(data={"ok": True}, meta=None, errors=None)
+

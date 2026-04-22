@@ -7,7 +7,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.v1.deps import get_current_user
+from app.api.v1.deps import get_current_user, has_permission
 from app.api.v1.students.schemas import StudentCreate, StudentDetail, StudentListResponse, StudentUpdate
 from app.db.models import User
 from app.db.session import get_db_session
@@ -28,7 +28,7 @@ async def list_students(
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
     session: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(get_current_user),
+    actor: User = Depends(has_permission("view_students")),
 ) -> Envelope[StudentListResponse]:
     data = await student_service.list_students(
         session,
@@ -53,7 +53,7 @@ async def list_students(
 async def create_student(
     payload: StudentCreate,
     session: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(get_current_user),
+    actor: User = Depends(has_permission("edit_students")),
 ) -> Envelope[StudentDetail]:
     detail = await student_service.create_student(session, actor=actor, payload=payload)
     return Envelope(data=detail, meta=None, errors=None)
@@ -66,7 +66,7 @@ async def batch_import_students(
     dry_run: bool = Form(False),
     default_password: str = Form(...),
     session: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(get_current_user),
+    actor: User = Depends(has_permission("edit_students")),
 ) -> Envelope[dict[str, Any]]:
     mapping_dict: dict[str, str] = json.loads(mapping)
     data = await import_batch_service.process_student_batch(
@@ -84,7 +84,7 @@ async def batch_import_students(
 async def get_student(
     student_id: UUID,
     session: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(get_current_user),
+    actor: User = Depends(has_permission("view_students")),
 ) -> Envelope[StudentDetail]:
     detail = await student_service.get_student_detail(session, actor=actor, student_id=student_id)
     return Envelope(data=detail, meta=None, errors=None)
@@ -95,7 +95,7 @@ async def patch_student(
     student_id: UUID,
     payload: StudentUpdate,
     session: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(get_current_user),
+    actor: User = Depends(has_permission("edit_students")),
 ) -> Envelope[StudentDetail]:
     detail = await student_service.update_student(session, actor=actor, student_id=student_id, payload=payload)
     return Envelope(data=detail, meta=None, errors=None)
@@ -105,7 +105,8 @@ async def patch_student(
 async def delete_student(
     student_id: UUID,
     session: AsyncSession = Depends(get_db_session),
-    actor: User = Depends(get_current_user),
+    actor: User = Depends(has_permission("edit_students")),
 ) -> Envelope[dict]:
     await student_service.soft_delete_student(session, actor=actor, student_id=student_id)
     return Envelope(data={"ok": True}, meta=None, errors=None)
+

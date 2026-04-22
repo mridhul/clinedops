@@ -14,16 +14,33 @@ const AuditLogViewer: React.FC = () => {
   const [skip, setSkip] = useState(0);
   const [limit, setLimit] = useState(50);
   const [actionFilter, setActionFilter] = useState<string>();
+  const [dateRange, setDateRange] = useState<[string, string] | [undefined, undefined]>([undefined, undefined]);
 
-  const { data: logsData, isLoading } = useAdminAuditLogs(accessToken, skip, limit, actionFilter);
+  const { data: logsData, isLoading } = useAdminAuditLogs(
+    accessToken, 
+    skip, 
+    limit, 
+    actionFilter, 
+    undefined, 
+    dateRange[0], 
+    dateRange[1]
+  );
+  
   // Type coerce because TanStack's useQuery usually wraps API responses
   const logsEnvelope = logsData as unknown as Envelope<any[]>;
   const dataSource = logsEnvelope?.data || [];
   const total = logsEnvelope?.meta?.total || 0;
 
   const handleExport = () => {
-    window.open(`${import.meta.env.VITE_API_BASE_URL}/admin/audit-logs/export`, '_blank');
+    const qs = new URLSearchParams();
+    if (actionFilter) qs.append('action', actionFilter);
+    if (dateRange[0]) qs.append('date_from', dateRange[0]);
+    if (dateRange[1]) qs.append('date_to', dateRange[1]);
+    
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+    window.open(`${baseUrl}/admin/audit-logs/export?${qs.toString()}`, '_blank');
   };
+
 
   const columns = [
     {
@@ -87,8 +104,18 @@ const AuditLogViewer: React.FC = () => {
             />
           </Col>
           <Col xs={24} md={10}>
-            <RangePicker className="w-full rounded-lg h-9" />
+            <RangePicker 
+              className="w-full rounded-lg h-9" 
+              onChange={(values) => {
+                if (values && values[0] && values[1]) {
+                  setDateRange([values[0].toISOString(), values[1].toISOString()]);
+                } else {
+                  setDateRange([undefined, undefined]);
+                }
+              }}
+            />
           </Col>
+
         </Row>
       </Card>
 
